@@ -15,16 +15,16 @@ class _MyAppState extends State<MyApp> {
   List<LatLng> routeCoordinates = [];
 
   @override
-  void initState() {
+  void initState() { //routeCoordinates를 불러오고 location을 받아오기 위한 함수
     super.initState();
     routeCoordinates = [];
     initLocation();
   }
 
-  void initLocation() async {
-    Location location = Location();
+  void initLocation() async { // initstate에 의해서만 호출됨
+    Location location = Location();  //Location은 gps 위치를 받아오는 '클래스' location은 객체 즉 객체 생성
 
-    bool serviceEnabled;
+    bool serviceEnabled; //서비스가 가능한지 위치를 받아왔는지 확인하는 flag?
     PermissionStatus permissionGranted;
 
     serviceEnabled = await location.serviceEnabled();
