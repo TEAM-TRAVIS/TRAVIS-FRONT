@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
               bottom: 50,
               left: 20,
               child: Text(
-                '현재 위치: ${currentLocation?.latitude}, ${currentLocation?.longitude}',
+                '현재 위치: ${currentLocation?.latitude}, ${currentLocation?.longitude}, ${currentLocation?.elapsedRealtimeNanos}',
                 style: TextStyle(fontSize: 16),
               ),
             ),
