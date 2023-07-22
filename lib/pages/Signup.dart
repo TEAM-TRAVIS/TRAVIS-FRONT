@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:myapp/pages/Login.dart';
 import 'package:myapp/User.dart';
@@ -21,16 +23,17 @@ class _SignupState extends State<Signup> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
+  final String url = "http://localhost:3000/user/signup";
   Future save() async {
-    var res = await http.post("http://localhost:3000/signup" as Uri,
+    var res = await http.post(Uri.parse(url),
         headers: <String, String>{
           'Context-Type': 'application/json;charSet=UTF-8'
         },
-        body: <String, String>{
+        body: jsonEncode(<String, String>{
           'name': user.name,
           'email': user.email,
           'password': user.password,
-        }); //post
+        })); //post
     print(res.body);
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => Login()));
