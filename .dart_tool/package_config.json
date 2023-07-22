@@ -374,6 +374,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "sliding_up_panel",
+      "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/sliding_up_panel-2.0.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "source_span",
       "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.9.1",
       "packageUri": "lib/",
@@ -464,7 +470,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2023-07-21T23:03:31.091691Z",
+  "generated": "2023-07-22T20:30:26.324480Z",
   "generator": "pub",
   "generatorVersion": "3.0.6"
 }

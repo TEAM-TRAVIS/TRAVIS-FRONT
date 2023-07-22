@@ -193,7 +193,7 @@ class _SignupState extends State<Signup> {
                               return "Password is required.";
                             } else if (value.length < 8) {
                               return "Password must be at least 8 characters long.";
-                            } else if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                            } else if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
                               return "Password must contain only English letters.";
                             } else{
                               return null;
@@ -262,7 +262,8 @@ class _SignupState extends State<Signup> {
                       ),
                       TextButton(
                         onPressed: () {
-                          print("Terms of use button clicked");
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const SignupComplete()));
                         },
                         child: Text("Terms of Use",
                           style: TextStyle(
