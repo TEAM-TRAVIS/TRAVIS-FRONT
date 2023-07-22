@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:myapp/utils.dart';
 import 'package:myapp/pages/CreateAccount.dart';
 
@@ -9,6 +10,10 @@ class Travis extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
+		SystemChrome.setPreferredOrientations([
+			DeviceOrientation.portraitUp,
+			DeviceOrientation.portraitDown,
+		]);
 		return MaterialApp(
 			title: 'Travis',
 			debugShowCheckedModeBanner: false,
