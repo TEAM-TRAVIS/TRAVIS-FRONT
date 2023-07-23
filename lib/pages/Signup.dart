@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myapp/pages/Login.dart';
 import 'package:myapp/User.dart';
 import 'package:myapp/pages/SignupComplete.dart';
@@ -22,21 +23,38 @@ class _SignupState extends State<Signup> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  final String url = "http://localhost:3000/user/signup";
+  final String url = "http://172.17.96.1:3000/user/signup";
+  Map<String, dynamic> responseData = {};
   Future save() async {
-    var res = await http.post(Uri.parse(url),
-        headers: <String, String>{
-          'Context-Type': 'application/json;charSet=UTF-8'
-        },
-        body: jsonEncode(<String, String>{
-          'name': user.name,
-          'email': user.email,
-          'password': user.password,
-        })); //post
-    print(res.body);
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Login()));
+    try {
+      var res = await http.post(Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/json;charSet=UTF-8'
+          },
+          body: jsonEncode(<String, String>{
+            'name': user.name,
+            'email': user.email,
+            'password': user.password,
+          })); //post
+      print(res.statusCode);
+      if (res.statusCode == 201) {
+        Navigator.push(context, MaterialPageRoute(
+            builder: (context) => Login()));
+      } else if (res.statusCode == 400) {
+        responseData = jsonDecode(res.body);
+        String message = responseData['error'];
+        Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 3,
+        );
+      } else {
+        print('요청에 실패하였습니다.');
+      }
+  } catch (e) {
+  print('오류 발생: $e');
   }
+}
 
   @override
   void dispose() {

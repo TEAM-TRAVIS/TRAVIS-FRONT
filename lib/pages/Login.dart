@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../utils.dart';
 import 'Signup.dart';
 import 'package:myapp/User.dart';
 import 'package:http/http.dart' as http;
-
+import 'Map.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -17,6 +20,41 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  // Map<String, String> responseData = {};
+  final String url = "http://172.17.96.1:3000/user/login";
+  Future save() async {
+    try {
+      var response = await http.post(Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/json;charSet=UTF-8'
+          },
+          body: jsonEncode(<String, String>{
+            'email': user.email,
+            'password': user.password,
+          })); //post
+      print(response.statusCode);
+      print(response);
+      if (response.statusCode == 302) {
+        print("로그인 성공");
+        // Navigator.push(context, MaterialPageRoute(
+        //     builder: (context) => Map()));
+      }
+      // // else if (res.statusCode == 400) {
+      //
+      //   responseData = jsonDecode(res.body);
+      //   String errorValue = responseData['error'];
+      //   Fluttertoast.showToast(
+      //     msg: errorValue,
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     timeInSecForIosWeb: 3,
+      //   );
+      // } else {
+      //   print('요청에 실패하였습니다.');
+      // }
+    } catch (e) {
+      print('오류 발생: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -32,6 +70,7 @@ class _LoginState extends State<Login> {
     _passwordFocusNode.unfocus();
   }
 
+  User user = User('', '', '');
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -78,12 +117,7 @@ class _LoginState extends State<Login> {
                         focusNode: _emailFocusNode,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
-                          // 입력 값이 변경될 때 실행되는 콜백 함수
-                          // DB에 저장된 유저 정보랑 비교함
-                          // value 매개변수에 입력된 텍스트가 전달됨
-                        },
-                        validator: (value) {
-                          // if ~~
+                          user.email = value;
                         },
                         decoration: InputDecoration(
                           labelText: 'your_email@example.com',
@@ -116,11 +150,7 @@ class _LoginState extends State<Login> {
                         focusNode: _passwordFocusNode,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
-                          // 입력 값이 변경될 때 실행되는 콜백 함수
-                          // value 매개변수에 입력된 텍스트가 전달됨
-                        },
-                        validator: (value) {
-                          // if ~~
+                          user.password = value;
                         },
                         decoration: InputDecoration(
                           labelText: 'type your password',
@@ -156,7 +186,7 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.fromLTRB(265, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
-                      print("Login button clicked");
+                      save();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],

@@ -35,6 +35,7 @@ INJECTED from D:\flutter_project\TRAVIS-FRONT\android\app\src\main\AndroidManife
 MERGED from D:\flutter_project\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml:1:1-36:12
 MERGED from [:google_maps_flutter_android] D:\flutter_project\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:flutter_plugin_android_lifecycle] D:\flutter_project\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
+MERGED from [:fluttertoast] D:\flutter_project\TRAVIS-FRONT\build\fluttertoast\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:path_provider_android] D:\flutter_project\TRAVIS-FRONT\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:location] D:\flutter_project\TRAVIS-FRONT\build\location\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-20:12
 MERGED from [:google_sign_in_android] D:\flutter_project\TRAVIS-FRONT\build\google_sign_in_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-11:12
@@ -92,6 +93,8 @@ MERGED from [:google_maps_flutter_android] D:\flutter_project\TRAVIS-FRONT\build
 MERGED from [:google_maps_flutter_android] D:\flutter_project\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:flutter_plugin_android_lifecycle] D:\flutter_project\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:flutter_plugin_android_lifecycle] D:\flutter_project\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:fluttertoast] D:\flutter_project\TRAVIS-FRONT\build\fluttertoast\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:fluttertoast] D:\flutter_project\TRAVIS-FRONT\build\fluttertoast\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:path_provider_android] D:\flutter_project\TRAVIS-FRONT\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:path_provider_android] D:\flutter_project\TRAVIS-FRONT\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:location] D:\flutter_project\TRAVIS-FRONT\build\location\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41

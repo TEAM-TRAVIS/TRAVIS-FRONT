@@ -18,7 +18,8 @@ com.example.untitled1.app-mergeDebugResources-16 D:\flutter_project\TRAVIS-FRONT
 com.example.untitled1.app-merged_res-17 D:\flutter_project\TRAVIS-FRONT\build\app\intermediates\merged_res\debug
 com.example.untitled1.app-packaged_res-18 D:\flutter_project\TRAVIS-FRONT\build\flutter_native_splash\intermediates\packaged_res\debug
 com.example.untitled1.app-packaged_res-19 D:\flutter_project\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\packaged_res\debug
-com.example.untitled1.app-packaged_res-20 D:\flutter_project\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\packaged_res\debug
-com.example.untitled1.app-packaged_res-21 D:\flutter_project\TRAVIS-FRONT\build\google_sign_in_android\intermediates\packaged_res\debug
-com.example.untitled1.app-packaged_res-22 D:\flutter_project\TRAVIS-FRONT\build\location\intermediates\packaged_res\debug
-com.example.untitled1.app-packaged_res-23 D:\flutter_project\TRAVIS-FRONT\build\path_provider_android\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-20 D:\flutter_project\TRAVIS-FRONT\build\fluttertoast\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-21 D:\flutter_project\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-22 D:\flutter_project\TRAVIS-FRONT\build\google_sign_in_android\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-23 D:\flutter_project\TRAVIS-FRONT\build\location\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-24 D:\flutter_project\TRAVIS-FRONT\build\path_provider_android\intermediates\packaged_res\debug

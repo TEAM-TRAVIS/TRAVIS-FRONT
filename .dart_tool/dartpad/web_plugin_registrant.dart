@@ -7,6 +7,7 @@
 // ignore_for_file: type=lint
 
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
+import 'package:fluttertoast/fluttertoast_web.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart';
 import 'package:google_sign_in_web/google_sign_in_web.dart';
 import 'package:location_web/location_web.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 void registerPlugins([final Registrar? pluginRegistrar]) {
   final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
   FlutterNativeSplashWeb.registerWith(registrar);
+  FluttertoastWebPlugin.registerWith(registrar);
   GoogleMapsPlugin.registerWith(registrar);
   GoogleSignInPlugin.registerWith(registrar);
   LocationWebPlugin.registerWith(registrar);
