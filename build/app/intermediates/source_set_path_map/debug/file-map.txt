@@ -22,3 +22,4 @@ com.example.untitled1.app-packaged_res-20 C:\Users\dhwjdrb1234\OneDrive\KMU Data
 com.example.untitled1.app-packaged_res-21 C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\google_sign_in_android\intermediates\packaged_res\debug
 com.example.untitled1.app-packaged_res-22 C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\location\intermediates\packaged_res\debug
 com.example.untitled1.app-packaged_res-23 C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\path_provider_android\intermediates\packaged_res\debug
+com.example.untitled1.app-packaged_res-24 C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\permission_handler_android\intermediates\packaged_res\debug

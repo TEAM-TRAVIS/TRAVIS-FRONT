@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'Signup.dart';
-import 'package:myapp/User.dart';
+import 'package:Travis/User.dart';
 import 'package:http/http.dart' as http;
+import 'package:Travis/pages/Map.dart';
 
 
 class Login extends StatefulWidget {
@@ -157,6 +158,8 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       print("Login button clicked");
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => const Map()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],

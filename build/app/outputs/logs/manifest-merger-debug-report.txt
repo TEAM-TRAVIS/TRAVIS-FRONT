@@ -33,6 +33,7 @@ INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android
 INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml:1:1-36:12
 INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml:1:1-36:12
 MERGED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml:1:1-36:12
+MERGED from [:permission_handler_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\permission_handler_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:google_maps_flutter_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [:path_provider_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
@@ -88,6 +89,8 @@ uses-sdk
 INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml
 INJECTED from C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\android\app\src\main\AndroidManifest.xml
+MERGED from [:permission_handler_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\permission_handler_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:permission_handler_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\permission_handler_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:google_maps_flutter_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:google_maps_flutter_android] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\google_maps_flutter_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\dhwjdrb1234\OneDrive\KMU Data\SVcamp\TRAVIS-FRONT\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
