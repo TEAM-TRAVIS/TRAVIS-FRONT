@@ -22,7 +22,7 @@ class _SignupState extends State<Signup> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  final String url = "http://localhost:3000/user/signup";
+  final String url = "http://192.168.8.117:3000/user/signup";
   Future save() async {
     var res = await http.post(Uri.parse(url),
         headers: <String, String>{
