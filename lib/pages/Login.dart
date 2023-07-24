@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
   final String url = "http://172.17.96.1:3000/user/login";
   Future save() async {
     try {
-      var response = await http.post(Uri.parse(url),
+      var res = await http.post(Uri.parse(url),
           headers: <String, String>{
             'Content-Type': 'application/json;charSet=UTF-8'
           },
@@ -32,9 +32,9 @@ class _LoginState extends State<Login> {
             'email': user.email,
             'password': user.password,
           })); //post
-      print(response.statusCode);
-      print(response);
-      if (response.statusCode == 302) {
+      print(res.statusCode);
+      print(res);
+      if (res.statusCode == 302) {
         print("로그인 성공");
         // Navigator.push(context, MaterialPageRoute(
         //     builder: (context) => Map()));

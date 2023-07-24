@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:myapp/utils.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -13,6 +14,8 @@ class Map extends StatefulWidget {
 
 class _MapState extends State<Map> {
   late GoogleMapController mapController;
+  List<LatLng> routePoints = [];
+  bool isTracking = false;
   LocationData? currentLocation; // LocationData 객체, LocationData는 사용자의 현재 위치 정보를 담는 클래스. 초기값으로 null을 할당하고 나중에 사용자의 위치 정보를 얻을때 값을 업데이트
   List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
   // 이 클래스는 지도를 표시하고, 사용자의 현재 위치를 얻어서 currentLocation 변수에 저장하며, 지도 상의 경로를 routeCoordinates 리스트에 저장하는 기능을 수행.
@@ -26,7 +29,6 @@ class _MapState extends State<Map> {
 
   void initLocation() async { // initstate에 의해서만 호출됨
     Location location = Location();  //Location은 gps 위치를 받아오는 '클래스' location은 객체 즉 객체 생성
-
     bool serviceEnabled; // 위치 서비스가 활성화되었는지 확인하는 변수
     PermissionStatus permissionGranted; // 위치 권한을 확인하는 변수
 
@@ -50,17 +52,45 @@ class _MapState extends State<Map> {
       setState(() { // setState() 메서드는 State 객체 내에서 상태를 변경할 때 사용되며 변경된 상태에 따라 UI가 다시 렌더링되어 반영됨. 그리고 currentLocation 변수와 routeCoordinates 리스트를 업데이트
         currentLocation = result; // 새로운 위치 정보를 result에 할당
         routeCoordinates.add(LatLng(result.latitude!, result.longitude!)); // result의 위도와 경도를 사용하여 LatLng 객체를 생성하고 이 객체를 routeCoordinates 리스트에 추가
-      });
-      if (mapController != null) { // GoogleMap이 떠 있을때만 작동하는 코드 블럭
-        mapController.animateCamera( // 지도의 카메라를 새로운 위치로 이동. animateCamera 메서드는 부드러운 이동 모션
-          CameraUpdate.newLatLng( // 카메라의 위치를 업데이트
-            LatLng(result.latitude!, result.longitude!),
-          ),
-        );
       }
+    );
+        if (mapController != null) { // GoogleMap이 떠 있을때만 작동하는 코드 블럭
+          mapController.animateCamera( // 지도의 카메라를 새로운 위치로 이동. animateCamera 메서드는 부드러운 이동 모션
+            CameraUpdate.newLatLng( // 카메라의 위치를 업데이트
+              LatLng(result.latitude!, result.longitude!),
+            ),
+          );
+        }
+      }
+    );
+  }
+
+  void _startTracking() {
+    setState(() {
+      routePoints.clear();
+      isTracking = true;
+    });
+  }
+
+  void _stopTracking() {
+    setState(() {
+      isTracking = false;
+    });
+  }
+
+  void _onLocationChanged(LocationData locationData) {
+    if (isTracking) {
+      setState(() {
+        routePoints.add(LatLng(locationData.latitude!, locationData.longitude!));
+      });
     }
-  );
-}
+  }
+
+  int milliseconds = 0;
+  String formatTime() {
+    Duration duration = Duration(milliseconds: milliseconds);
+    return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +147,14 @@ class _MapState extends State<Map> {
                   points: routeCoordinates,
                 ),
               },
+              zoomControlsEnabled: false,
+              markers: <Marker>{
+                Marker(
+                  markerId: MarkerId('currentLocation'),
+                  position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+                  infoWindow: InfoWindow(title: 'My Location'),
+                ),
+              },
             ),
             SlidingUpPanel(
               minHeight: 70,
@@ -130,6 +168,23 @@ class _MapState extends State<Map> {
                     blurRadius: 0
                 ),
               ],
+              header: Padding(
+                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 100,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
+                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               panel: Container(
                 margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
                 child: Column(
@@ -159,13 +214,15 @@ class _MapState extends State<Map> {
                     ElevatedButton(
                       onPressed: () {
                         print("start button clicked");
+                        isTracking ? isTracking = false : isTracking = true;
+                        // isTracking ? _stopTracking : _startTracking;
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 242)),
                         minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                       ),
-                      child: Text("Start",
+                      child: Text(isTracking ? 'Stop' : 'Start',
                         style: SafeGoogleFont(
                           'NanumGothic',
                           fontSize: 15,
@@ -173,24 +230,19 @@ class _MapState extends State<Map> {
                         ),
                       ),
                     ),
+                    Row(
+                      children: [
+                        Text(
+                          formatTime(),
+                          style: SafeGoogleFont(
+                            'MuseoModerno',
+                            fontSize: 25,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-              ),
-              header: Padding(
-                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
-                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 0,
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),

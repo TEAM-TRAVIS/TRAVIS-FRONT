@@ -39,6 +39,8 @@ dependencies:
   location: ^5.0.0
   sliding_up_panel: ^2.0.0+1
   fluttertoast: ^8.2.2
+  intl: ^0.18.1
+  geolocator: ^9.0.2
 
 
   # The following adds the Cupertino Icons font to your application.
