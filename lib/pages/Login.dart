@@ -35,21 +35,19 @@ class _LoginState extends State<Login> {
       print(res);
       if (res.statusCode == 302) {
         print("로그인 성공");
-        // Navigator.push(context, MaterialPageRoute(
-        //     builder: (context) => Map()));
+        Navigator.push(context, MaterialPageRoute(
+            builder: (context) => Map()));
       }
-      // // else if (res.statusCode == 400) {
-      //
-      //   responseData = jsonDecode(res.body);
-      //   String errorValue = responseData['error'];
-      //   Fluttertoast.showToast(
-      //     msg: errorValue,
-      //     toastLength: Toast.LENGTH_SHORT,
-      //     timeInSecForIosWeb: 3,
-      //   );
-      // } else {
-      //   print('요청에 실패하였습니다.');
-      // }
+      else if (res.statusCode == 401) {
+        print('로그인 실패');
+        Fluttertoast.showToast(
+          msg: "Check your email or password",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 3,
+        );
+      } else {
+        print('요청에 실패하였습니다.');
+      }
     } catch (e) {
       print('오류 발생: $e');
     }
@@ -147,6 +145,7 @@ class _LoginState extends State<Login> {
                       TextFormField(
                         controller: _passwordController,
                         focusNode: _passwordFocusNode,
+                        obscureText: true,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           user.password = value;
