@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/utils.dart';
-import 'Login.dart';
-import '../pages/Signup.dart';
+import 'package:Travis/pages/Login.dart';
+import 'package:Travis/pages/Signup.dart';
+import 'package:Travis/utils.dart';
 
 class CreateAccount extends StatelessWidget {
   const CreateAccount({super.key});

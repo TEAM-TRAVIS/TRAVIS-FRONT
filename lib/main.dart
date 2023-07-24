@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:myapp/utils.dart';
-import 'package:myapp/pages/CreateAccount.dart';
+import 'package:Travis/pages/CreateAccount.dart';
+import 'package:Travis/utils.dart';
 
 void main() => runApp(const Travis());
 

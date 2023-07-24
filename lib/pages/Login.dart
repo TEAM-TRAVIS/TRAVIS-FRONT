@@ -1,12 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:Travis/pages/Signup.dart';
+import 'package:Travis/pages/Map.dart';
+import 'package:Travis/User.dart';
+import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../utils.dart';
-import 'Signup.dart';
-import 'package:myapp/User.dart';
 import 'package:http/http.dart' as http;
-import 'Map.dart';
+import 'dart:convert';
 
 class Login extends StatefulWidget {
   const Login({super.key});
