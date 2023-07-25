@@ -1,0 +1,51 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:1:1-17:12
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:1:1-17:12
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:1:1-17:12
+	package
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:2:3-46
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:1:11-69
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:4:5-81
+	android:name
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:4:22-78
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:5:5-79
+	android:name
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:5:22-76
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:6:5-77
+	android:name
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:6:22-74
+application
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:9:5-16:19
+service#com.almoullim.background_location.LocationUpdatesService
+ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:10:9-15:37
+	android:enabled
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:13:13-35
+	android:exported
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:14:13-37
+	android:permission
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:15:13-34
+	android:foregroundServiceType
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:12:13-53
+	android:name
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:11:13-51
+uses-sdk
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+		ADDED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml

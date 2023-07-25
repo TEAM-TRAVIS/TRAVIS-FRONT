@@ -5,8 +5,8 @@ import 'package:Travis/pages/CreateAccount.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
-	WidgetsFlutterBinding.ensureInitialized(); // 앱 초기화
-	await Permission.location.request();
+	//WidgetsFlutterBinding.ensureInitialized(); // 앱 초기화
+	//await Permission.location.request();
 	runApp(const Travis());
 }
 

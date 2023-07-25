@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="location_updates_label">Location Updates</string>
+    <string name="ok">OK</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core
+        functionality.</string>
+    <string name="permission_rationale">Location permission is needed for core functionality</string>
+    <string name="remove_location_updates">Remove location updates</string>
+    <string name="request_location_updates">Request location updates</string>
+    <string name="settings">Settings</string>
+</resources>

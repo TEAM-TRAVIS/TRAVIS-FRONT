@@ -20,6 +20,12 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "background_location",
+      "rootUri": "file:///C:/Users/dhwjdrb1234/AppData/Local/Pub/Cache/hosted/pub.dev/background_location-0.11.8",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///C:/Users/dhwjdrb1234/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.1",
       "packageUri": "lib/",
@@ -500,7 +506,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2023-07-23T04:42:48.401564Z",
+  "generated": "2023-07-23T05:25:33.532525Z",
   "generator": "pub",
   "generatorVersion": "3.0.6"
 }

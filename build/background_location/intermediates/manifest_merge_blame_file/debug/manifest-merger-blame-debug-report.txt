@@ -1,0 +1,37 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.almoullim.background_location" >
+4
+5    <uses-sdk
+6        android:minSdkVersion="18"
+6-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+7        android:targetSdkVersion="18" />
+7-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml
+8
+9    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+9-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:4:5-81
+9-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:4:22-78
+10    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+10-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:5:5-79
+10-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:5:22-76
+11    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+11-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:6:5-77
+11-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:6:22-74
+12
+13    <application>
+13-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:9:5-16:19
+14        <service
+14-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:10:9-15:37
+15            android:name="com.almoullim.background_location.LocationUpdatesService"
+15-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:11:13-51
+16            android:enabled="true"
+16-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:13:13-35
+17            android:exported="false"
+17-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:14:13-37
+18            android:foregroundServiceType="location"
+18-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:12:13-53
+19            android:permission="" />
+19-->C:\Users\dhwjdrb1234\AppData\Local\Pub\Cache\hosted\pub.dev\background_location-0.11.8\android\src\main\AndroidManifest.xml:15:13-34
+20    </application>
+21
+22</manifest>

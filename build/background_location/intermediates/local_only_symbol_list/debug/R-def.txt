@@ -1,0 +1,9 @@
+R_DEF: Internal format may change without notice
+local
+string location_updates_label
+string ok
+string permission_denied_explanation
+string permission_rationale
+string remove_location_updates
+string request_location_updates
+string settings
