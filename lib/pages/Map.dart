@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -8,12 +9,15 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 
+List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
+
 class Map extends StatefulWidget {
   const Map({super.key});
 
   @override
   _MapState createState() => _MapState();
 }
+
 // 이 클래스는 지도를 표시하고, 사용자의 현재 위치를 얻어서 currentLocation 변수에 저장하며, 지도 상의 경로를 routeCoordinates 리스트에 저장하는 기능을 수행.
 class _MapState extends State<Map> {
   late GoogleMapController mapController;
@@ -22,7 +26,6 @@ class _MapState extends State<Map> {
   double totalDistance = 0.0;
   bool isTracking = false;
   LocationData? currentLocation; // LocationData 객체, LocationData는 사용자의 현재 위치 정보를 담는 클래스. 초기값으로 null을 할당하고 나중에 사용자의 위치 정보를 얻을때 값을 업데이트
-  List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 
   // State 객체가 생성된 직후에 호출되는 특별한 초기화 메서드
   @override
@@ -109,6 +112,8 @@ class _MapState extends State<Map> {
     setState(() {
       milliseconds = 0;
     });
+    Navigator.push(context, MaterialPageRoute(
+        builder: (context) => const Result()));
   }
 
   void toggleTimer() {
@@ -355,16 +360,6 @@ class _MapState extends State<Map> {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 10,
-              left: 0,
-              child: Text(
-                '현재 위치: ${currentLocation?.latitude}/ ${currentLocation?.longitude}/ ${currentLocation?.elapsedRealtimeNanos}',
-                style: const TextStyle(fontSize: 15,
-                  fontWeight: FontWeight.bold
                 ),
               ),
             ),
