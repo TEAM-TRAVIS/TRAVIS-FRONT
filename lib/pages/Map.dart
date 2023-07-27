@@ -8,10 +8,9 @@ import 'package:location/location.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
-import 'package:Travis/gps.dart';
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
-
+var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
 class Map extends StatefulWidget {
   const Map({super.key});
 
@@ -21,7 +20,144 @@ class Map extends StatefulWidget {
 
 // 이 클래스는 지도를 표시하고, 사용자의 현재 위치를 얻어서 currentLocation 변수에 저장하며, 지도 상의 경로를 routeCoordinates 리스트에 저장하는 기능을 수행.
 class _MapState extends State<Map> {
-  final GPS gps = GPS();
+  late GoogleMapController mapController;
+  late Timer timer;
+  int milliseconds = 0;
+  double totalDistance = 0.0;
+  bool isTracking = false;
+  LocationData? currentLocation; // LocationData 객체, LocationData는 사용자의 현재 위치 정보를 담는 클래스. 초기값으로 null을 할당하고 나중에 사용자의 위치 정보를 얻을때 값을 업데이트
+
+  // State 객체가 생성된 직후에 호출되는 특별한 초기화 메서드
+  @override
+  void initState() {
+    super.initState();
+    routeCoordinates = [];
+    initLocation();
+  }
+
+  // 위치 권한이 있는지 확인하고 없으면 위치 권한을 받는 함수
+  void initLocation() async {
+    // initstate에 의해서만 호출됨
+    Location location = Location(); //Location은 gps 위치를 받아오는 '클래스' location은 객체 즉 객체 생성
+    bool serviceEnabled; // 위치 서비스가 활성화되었는지 확인하는 변수
+    PermissionStatus permissionGranted; // 위치 권한을 확인하는 변수
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    location.onLocationChanged.throttle((_) => TimerStream(true, const Duration(seconds: 3)))
+        .listen((LocationData locationData) { // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
+      setState(() {
+        currentLocation = locationData;
+        if(latmin > locationData.latitude!)
+          {
+            latmin = locationData.latitude!;
+          }
+        if(lonmin > locationData.longitude!)
+        {
+          lonmin = locationData.longitude!;
+        }
+        if(latmax < locationData.latitude!)
+        {
+          latmax = locationData.latitude!;
+        }
+        if(lonmax < locationData.longitude!)
+        {
+          lonmax = locationData.longitude!;
+        }
+        if (isTracking) {
+          LatLng currentLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+          if (routeCoordinates.isNotEmpty) {
+            totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
+          }
+          routeCoordinates.add(currentLatLng);
+        }
+      });
+      mapController.animateCamera(
+        CameraUpdate.newLatLng(LatLng(locationData.latitude!-0.001, locationData.longitude!)),
+      );
+    }
+    );
+  }
+
+  double calculateDistance(LatLng latLng1, LatLng latLng2) {
+    double distanceInMeters = Geolocator.distanceBetween(
+      latLng1.latitude,
+      latLng1.longitude,
+      latLng2.latitude,
+      latLng2.longitude,
+    );
+    return distanceInMeters;
+  }
+
+  double calculateTotalDistance() {
+    double totalDistance = 0.0;
+    for (int i = 0; i < routeCoordinates.length - 1; i++) {
+      totalDistance += calculateDistance(routeCoordinates[i], routeCoordinates[i + 1]);
+    }
+    return totalDistance;
+  }
+
+  String formatTime() {
+    Duration duration = Duration(milliseconds: milliseconds);
+    return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(const Duration(milliseconds: 10), (Timer timer) {
+      setState(() {
+        milliseconds += 10;
+      });
+    });
+  }
+
+  void stopTimer() {
+    timer.cancel();
+    setState(() {
+      milliseconds = 0;
+    });
+    Navigator.push(context, MaterialPageRoute(
+        builder: (context) => const Result()));
+  }
+
+  void toggleTimer() {
+    if (isTracking) {
+      stopTimer();
+    } else {
+      startTimer();
+    }
+    setState(() {
+      isTracking = !isTracking;
+    });
+  }
+
+  void _startTracking() {
+    setState(() {
+      routeCoordinates.clear();
+      isTracking = true;
+      totalDistance = 0.0;
+    });
+  }
+
+  void _stopTracking() {
+    setState(() {
+      isTracking = false;
+      totalDistance = calculateTotalDistance();
+    });
+    print(routeCoordinates);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +187,13 @@ class _MapState extends State<Map> {
           ),
           actions: [
             IconButton(
-                onPressed: () {
-                  print("settings button clicked");
-                },
-                icon: Icon(Icons.settings,
-                  color: Colors.blue[500],
-                ),
+              onPressed: () {
+                print(routeCoordinates);
+                print("settings button clicked");
+              },
+              icon: Icon(Icons.settings,
+                color: Colors.blue[500],
+              ),
             ),
           ],
         ),
@@ -64,26 +201,26 @@ class _MapState extends State<Map> {
           children: [
             GoogleMap(
               onMapCreated: (GoogleMapController controller) {
-                gps.mapController = controller;
+                mapController = controller;
               },
               initialCameraPosition: const CameraPosition(
                 target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
-                zoom: 12.0,
+                zoom: 15.0,
               ),
               polylines: <Polyline>{
-                if (gps.isTracking)
+                if (isTracking)
                   Polyline(
-                    polylineId: PolylineId("route"),
-                    color: Colors.blue,
-                    width: 5,
-                    points: gps.routeCoordinates
+                      polylineId: PolylineId("route"),
+                      color: Colors.blue,
+                      width: 5,
+                      points: routeCoordinates
                   ),
               },
               zoomControlsEnabled: false,
               markers: <Marker>{
                 Marker(
                   markerId: MarkerId('currentLocation'),
-                  position: LatLng(gps.currentLocation!.latitude!, gps.currentLocation!.longitude!),
+                  position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
                   infoWindow: InfoWindow(title: 'My Location'),
                 ),
               },
@@ -145,19 +282,19 @@ class _MapState extends State<Map> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        gps.toggleTimer();
-                        gps.isTracking ? gps.stopTracking : gps.startTracking;
+                        toggleTimer();
+                        isTracking ? _stopTracking : _startTracking;
                       },
-                      style: gps.isTracking?
-                        ButtonStyle(
+                      style: isTracking?
+                      ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
                           minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
                           shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
-                        ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
-                            minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
-                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                      child: Text(gps.isTracking ? 'Stop' : 'Start',
+                      ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
+                          minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                      child: Text(isTracking ? 'Stop' : 'Start',
                         style: SafeGoogleFont(
                           'NanumGothic',
                           fontSize: 15,
@@ -176,7 +313,7 @@ class _MapState extends State<Map> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      gps.formatTime(),
+                                      formatTime(),
                                       style: SafeGoogleFont(
                                         'MuseoModerno',
                                         fontSize: 25,
@@ -208,17 +345,17 @@ class _MapState extends State<Map> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    gps.isTracking ?
-                                      Text('${(gps.totalDistance/1000).toStringAsFixed(1)}km',
+                                    isTracking ?
+                                    Text('${(totalDistance/1000).toStringAsFixed(1)}km',
                                         style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w500)) :
-                                      Text('0km',
+                                            'MuseoModerno',
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w500)) :
+                                    Text('0km',
                                         style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w500)),
+                                            'MuseoModerno',
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w500)),
                                     const Divider(
                                       color: Color.fromARGB(255, 217, 217, 217),
                                       height: 1,

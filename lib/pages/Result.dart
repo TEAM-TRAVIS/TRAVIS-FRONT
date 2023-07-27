@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
@@ -16,29 +18,9 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  // 위치 권한이 있는지 확인하고 없으면 위치 권한을 받는 함수
-  void initLocation() async {
-    // initstate에 의해서만 호출됨
-    if (routeCoordinates.isNotEmpty) {
-      // routeCoordinates가 비어있지 않을 때
-      LatLngBounds bounds = LatLngBounds(
-        southwest: LatLng(routeCoordinates.first.latitude, routeCoordinates.first.longitude),
-        northeast: LatLng(routeCoordinates.last.latitude, routeCoordinates.last.longitude),
-      );
-      mapController!.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 10.0)
-      );
-    }
+  void printZoomLevel() async {
+    double zoomLevel = await mapController.getZoomLevel();
+    print('Current Zoom Level: $zoomLevel');
   }
 
   @override
@@ -59,7 +41,7 @@ class _ResultState extends State<Result> {
           leading: TextButton(
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => Map()));
+                  builder: (context) => const Map()));
             },
             child: Text("Cancel",
               style: SafeGoogleFont(
@@ -72,6 +54,15 @@ class _ResultState extends State<Result> {
           actions: [
             TextButton(
               onPressed: () {
+                print(latmax);
+                print(latmin);
+                print(lonmax);
+                print(lonmin);
+                printZoomLevel();
+                print("위도차 ${latmax - latmin}");
+                print("경도차 ${lonmax - lonmin}");
+                print(((latmax - latmin) /2 + latmin));
+                print(((lonmax - lonmin) /2 + lonmin));
                 print("save button clicked");
               },
               child: Text("Save",
@@ -89,15 +80,14 @@ class _ResultState extends State<Result> {
             GoogleMap(
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
-                initLocation();
               },
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
-                zoom: 12.0,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(((latmax - latmin) /2 + latmin), ((lonmax - lonmin) /2 + lonmin)), // 초기 지도 중심 좌표
+                zoom: 9.2166 * exp(-3.3976 * max((latmax - latmin), (lonmax - lonmin))) + 5.5,
               ),
               polylines: <Polyline>{
                 Polyline(
-                    polylineId: PolylineId("route"),
+                    polylineId: const PolylineId("route"),
                     color: Colors.blue,
                     width: 5,
                     points: routeCoordinates
