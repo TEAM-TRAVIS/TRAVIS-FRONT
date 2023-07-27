@@ -81,9 +81,10 @@ class _ResultState extends State<Result> {
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
               },
+              //
               initialCameraPosition: CameraPosition(
                 target: LatLng(((latmax - latmin) /2 + latmin), ((lonmax - lonmin) /2 + lonmin)), // 초기 지도 중심 좌표
-                zoom: 9.2166 * exp(-3.3976 * max((latmax - latmin), (lonmax - lonmin))) + 5.5,
+                zoom: -log( max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
               ),
               polylines: <Polyline>{
                 Polyline(
