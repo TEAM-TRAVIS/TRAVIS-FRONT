@@ -1,12 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:location/location.dart';
+import 'dart:math';
+import 'dart:io';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -17,6 +15,39 @@ class Result extends StatefulWidget {
 
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
+
+  // final String url = "http://172.17.96.1:3000/user/signup";
+  // Map<String, dynamic> responseData = {};
+  // Future save() async {
+  //   try {
+  //     var res = await http.post(Uri.parse(url),
+  //         headers: <String, String>{
+  //           'Content-Type': 'application/json;charSet=UTF-8'
+  //         },
+  //         body: jsonEncode(<String, String>{
+  //           'name': user.name,
+  //           'email': user.email,
+  //           'password': user.password,
+  //         })); //post
+  //     print(res.statusCode);
+  //     if (res.statusCode == 201) {
+  //       Navigator.push(context, MaterialPageRoute(
+  //           builder: (context) => Login()));
+  //     } else if (res.statusCode == 400) {
+  //       responseData = jsonDecode(res.body);
+  //       String message = responseData['error'];
+  //       Fluttertoast.showToast(
+  //         msg: message,
+  //         toastLength: Toast.LENGTH_SHORT,
+  //         timeInSecForIosWeb: 3,
+  //       );
+  //     } else {
+  //       print('요청에 실패하였습니다.');
+  //     }
+  //   } catch (e) {
+  //     print('오류 발생: $e');
+  //   }
+  // }
 
   void printZoomLevel() async {
     double zoomLevel = await mapController.getZoomLevel();
@@ -54,16 +85,7 @@ class _ResultState extends State<Result> {
           actions: [
             TextButton(
               onPressed: () {
-                print(latmax);
-                print(latmin);
-                print(lonmax);
-                print(lonmin);
-                printZoomLevel();
-                print("위도차 ${latmax - latmin}");
-                print("경도차 ${lonmax - lonmin}");
-                print(((latmax - latmin) /2 + latmin));
-                print(((lonmax - lonmin) /2 + lonmin));
-                print("save button clicked");
+                save();
               },
               child: Text("Save",
                 style: SafeGoogleFont(

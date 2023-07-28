@@ -1,3 +1,5 @@
+import 'package:Travis/User.dart';
+import 'package:Travis/pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
@@ -8,9 +10,13 @@ import 'package:location/location.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
+import 'package:gpx/gpx.dart';
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
+
+Gpx gpx = Gpx();
+
 class Map extends StatefulWidget {
   const Map({super.key});
 
@@ -57,27 +63,38 @@ class _MapState extends State<Map> {
       }
     }
 
-    location.onLocationChanged.throttle((_) => TimerStream(true, const Duration(seconds: 3)))
+    location.onLocationChanged.throttle((_) => TimerStream(true, const Duration(seconds: 0)))
         .listen((LocationData locationData) { // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
       setState(() {
         currentLocation = locationData;
-        if(latmin > locationData.latitude!)
+        // isTracking 일때만 아래 로직 작동
+        if (isTracking) {
+          if(latmin > locationData.latitude!)
           {
             latmin = locationData.latitude!;
           }
-        if(lonmin > locationData.longitude!)
-        {
-          lonmin = locationData.longitude!;
-        }
-        if(latmax < locationData.latitude!)
-        {
-          latmax = locationData.latitude!;
-        }
-        if(lonmax < locationData.longitude!)
-        {
-          lonmax = locationData.longitude!;
-        }
-        if (isTracking) {
+          if(lonmin > locationData.longitude!)
+          {
+            lonmin = locationData.longitude!;
+          }
+          if(latmax < locationData.latitude!)
+          {
+            latmax = locationData.latitude!;
+          }
+          if(lonmax < locationData.longitude!)
+          {
+            lonmax = locationData.longitude!;
+          }
+
+          gpx.wpts.add(
+            Wpt(
+                lat: locationData.latitude!,
+                lon: locationData.longitude!,
+                ele: locationData.altitude!,
+                time: DateTime.now(),
+            )
+          );
+
           LatLng currentLatLng = LatLng(locationData.latitude!, locationData.longitude!);
           if (routeCoordinates.isNotEmpty) {
             totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
@@ -157,6 +174,8 @@ class _MapState extends State<Map> {
       totalDistance = calculateTotalDistance();
     });
     print(routeCoordinates);
+    final gpxString = GpxWriter().asString(gpx, pretty: true);
+    print(gpxString);
   }
 
   @override
@@ -210,7 +229,7 @@ class _MapState extends State<Map> {
               polylines: <Polyline>{
                 if (isTracking)
                   Polyline(
-                      polylineId: PolylineId("route"),
+                      polylineId: const PolylineId("route"),
                       color: Colors.blue,
                       width: 5,
                       points: routeCoordinates
@@ -219,9 +238,9 @@ class _MapState extends State<Map> {
               zoomControlsEnabled: false,
               markers: <Marker>{
                 Marker(
-                  markerId: MarkerId('currentLocation'),
+                  markerId: const MarkerId('currentLocation'),
                   position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-                  infoWindow: InfoWindow(title: 'My Location'),
+                  infoWindow: const InfoWindow(title: 'My Location'),
                 ),
               },
             ),
@@ -330,7 +349,7 @@ class _MapState extends State<Map> {
                                         'NanumGothic',
                                         fontSize: 10,
                                         fontWeight: FontWeight.normal,
-                                        color: Color.fromARGB(255, 163, 163, 163),
+                                        color: const Color.fromARGB(255, 163, 163, 163),
                                       ),
                                     ),
                                   ],
@@ -366,7 +385,7 @@ class _MapState extends State<Map> {
                                         'NanumGothic',
                                         fontSize: 10,
                                         fontWeight: FontWeight.normal,
-                                        color: Color.fromARGB(255, 163, 163, 163),
+                                        color: const Color.fromARGB(255, 163, 163, 163),
                                       ),
                                     ),
                                   ],

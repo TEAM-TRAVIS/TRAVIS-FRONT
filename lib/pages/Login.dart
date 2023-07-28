@@ -19,7 +19,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-  // Map<String, String> responseData = {};
+
   final String url = "http://172.17.96.1:3000/user/login";
   Future save() async {
     try {

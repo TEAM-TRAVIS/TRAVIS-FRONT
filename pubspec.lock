@@ -320,6 +320,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.2+1"
+  gpx:
+    dependency: "direct main"
+    description:
+      name: gpx
+      sha256: "2afa90c9faf6687e8013a1d159204b81b95da6d6d931b9832111bf10d3e6c229"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   html:
     dependency: transitive
     description:
@@ -710,7 +718,7 @@ packages:
     source: hosted
     version: "1.0.1"
   xml:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: xml
       sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
