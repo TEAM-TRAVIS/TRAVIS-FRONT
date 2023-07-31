@@ -116,7 +116,6 @@ class _LoginState extends State<Login> {
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           user.email = value;
-                          Provider.of<UserProvider>(context, listen: false).setUser(user);
                         },
                         decoration: InputDecoration(
                           labelText: 'your_email@example.com',
@@ -187,6 +186,8 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       save();
+                      Provider.of<UserProvider>(context, listen: false).setUserInfo(user.email);
+                      // print("뿌르를르르르르르 ${user}");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],

@@ -89,10 +89,6 @@ class MapState extends State<Map> with ChangeNotifier {
               lonmax = locationData.longitude!;
             }
 
-            gpx.metadata = Metadata(
-              name: Provider.of<UserProvider>(context).user!.email,
-              // name: "jongmin",
-            );
             gpx.wpts.add(
                 Wpt(
                   lat: locationData.latitude!,
@@ -351,8 +347,10 @@ class MapState extends State<Map> with ChangeNotifier {
                               onPressed: () {
                                 toggleTimer();
                                 _stopTracking();
-                                print(isTracking);
-                                print(isRunning);
+                                gpx.metadata = Metadata(
+                                  name: Provider.of<UserProvider>(context, listen: false).userEmail,
+                                  // name: "jongmin",
+                                );
                               },
                               style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
@@ -373,8 +371,6 @@ class MapState extends State<Map> with ChangeNotifier {
                         onPressed: () {
                           toggleTimer();
                           _startTracking();
-                          print(isTracking);
-                          print(isRunning);
                         },
                         style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),

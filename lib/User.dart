@@ -9,12 +9,12 @@ class User with ChangeNotifier {
 }
 
 class UserProvider extends ChangeNotifier {
-  User? _user;
+  String? _userEmail;
 
-  User? get user => _user;
+  String? get userEmail => _userEmail;
 
-  void setUser(User user) {
-    _user = user;
+  void setUserInfo(String email) {
+    _userEmail = email;
     notifyListeners(); // 상태가 변경되었음을 리스너들에게 알립니다.
   }
 }
