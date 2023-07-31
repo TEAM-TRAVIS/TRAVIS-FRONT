@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
@@ -9,7 +8,6 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
-
 import 'package:Travis/pages/MyPage.dart';
 
 class Result extends StatefulWidget {
@@ -28,19 +26,16 @@ class _ResultState extends State<Result> {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
-    print("세이브 버튼 눌러서 출력해줬음");
-    // print(gpxString);
-    print(gpxGzip);
-    print(gpxBase64);
-
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
             'Content-Type': 'application/gzip',
+            // 'Content-Type': 'application/json;charSet=UTF-8',
           },
-          body: gpxBase64,
+          body: jsonEncode(<String, String>{
+            'body': gpxBase64,
+          }),
       ); //post
-      print(response);
       print(response.statusCode);
       print(response.body);
     } catch (e) {
@@ -54,6 +49,7 @@ class _ResultState extends State<Result> {
   // }
 
   @override
+  Map map = const Map();
   Widget build(BuildContext context) {
     final Gpx gpxData = ModalRoute.of(context)!.settings.arguments as Gpx;
     return MaterialApp(
@@ -172,8 +168,78 @@ class _ResultState extends State<Result> {
                       height: 1,
                       thickness: 1,
                     ),
-                    // Container(
-                    //   child:
+                    // Expanded(
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     children: [
+                    //       Expanded(
+                    //         child: Center(
+                    //           child: Column(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             children: [
+                    //               Text(
+                    //                 toogleTimer();
+                    //                 style: SafeGoogleFont(
+                    //                   'MuseoModerno',
+                    //                   fontSize: 25,
+                    //                   fontWeight: FontWeight.w500,
+                    //                 ),
+                    //               ),
+                    //               const Divider(
+                    //                 color: Color.fromARGB(255, 217, 217, 217),
+                    //                 height: 1,
+                    //                 thickness: 1,
+                    //               ),
+                    //               Text("Time",
+                    //                 style: SafeGoogleFont(
+                    //                   'NanumGothic',
+                    //                   fontSize: 10,
+                    //                   fontWeight: FontWeight.normal,
+                    //                   color: const Color.fromARGB(255, 163, 163, 163),
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       ),
+                    //       const SizedBox(
+                    //         width: 30,
+                    //       ),
+                    //       Expanded(
+                    //         child: Center(
+                    //           child: Column(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             children: [
+                    //               isTracking ?
+                    //               Text('${(totalDistance/1000).toStringAsFixed(1)}km',
+                    //                   style: SafeGoogleFont(
+                    //                       'MuseoModerno',
+                    //                       fontSize: 25,
+                    //                       fontWeight: FontWeight.w500)) :
+                    //               Text('0km',
+                    //                   style: SafeGoogleFont(
+                    //                       'MuseoModerno',
+                    //                       fontSize: 25,
+                    //                       fontWeight: FontWeight.w500)),
+                    //               const Divider(
+                    //                 color: Color.fromARGB(255, 217, 217, 217),
+                    //                 height: 1,
+                    //                 thickness: 1,
+                    //               ),
+                    //               Text("Distance",
+                    //                 style: SafeGoogleFont(
+                    //                   'NanumGothic',
+                    //                   fontSize: 10,
+                    //                   fontWeight: FontWeight.normal,
+                    //                   color: const Color.fromARGB(255, 163, 163, 163),
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
                     // ),
                   ],
                 ),
