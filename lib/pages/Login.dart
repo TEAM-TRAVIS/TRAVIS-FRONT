@@ -36,7 +36,6 @@ class _LoginState extends State<Login> {
       print(res.statusCode);
       print(res);
       if (res.statusCode == 302) {
-        print("로그인 성공");
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Map()));
       }
@@ -117,7 +116,7 @@ class _LoginState extends State<Login> {
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           user.email = value;
-                          // Provider.of<UserData>(context, listen: false).setUser(user);
+                          Provider.of<UserProvider>(context, listen: false).setUser(user);
                         },
                         decoration: InputDecoration(
                           labelText: 'your_email@example.com',

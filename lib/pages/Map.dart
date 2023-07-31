@@ -23,18 +23,21 @@ class Map extends StatefulWidget {
   const Map({super.key});
 
   @override
-  _MapState createState() => _MapState();
+  MapState createState() => MapState();
 }
 
 // 이 클래스는 지도를 표시하고, 사용자의 현재 위치를 얻어서 currentLocation 변수에 저장하며, 지도 상의 경로를 routeCoordinates 리스트에 저장하는 기능을 수행.
-class _MapState extends State<Map> {
+class MapState extends State<Map> with ChangeNotifier {
   late GoogleMapController mapController;
   late Timer timer;
   int milliseconds = 0;
   double totalDistance = 0.0;
   bool isTracking = false;
   bool isRunning = false;
-  LocationData? currentLocation; // LocationData 객체, LocationData는 사용자의 현재 위치 정보를 담는 클래스. 초기값으로 null을 할당하고 나중에 사용자의 위치 정보를 얻을때 값을 업데이트
+  LocationData? currentLocation = LocationData.fromMap({
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+  });
 
   // State 객체가 생성된 직후에 호출되는 특별한 초기화 메서드
   @override
@@ -87,7 +90,8 @@ class _MapState extends State<Map> {
             }
 
             gpx.metadata = Metadata(
-              name: 'Jongmin' // Provider.of<User>(context, listen: false).email,
+              name: Provider.of<UserProvider>(context).user!.email,
+              // name: "jongmin",
             );
             gpx.wpts.add(
                 Wpt(

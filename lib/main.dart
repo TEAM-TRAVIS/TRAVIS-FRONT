@@ -1,4 +1,5 @@
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
@@ -28,18 +29,23 @@ class Travis extends StatelessWidget {
 			// 	ChangeNotifierProvider(create: (context) => ),
 			// ],
 		  // child:
-		return MaterialApp(
-		  	title: 'Travis',
-		  	debugShowCheckedModeBanner: false,
-		  	scrollBehavior: MyCustomScrollBehavior(),
-		  	theme: ThemeData(
-		  		primarySwatch: Colors.blue,
-		  	),
-		  	home: const Scaffold(
-		  		body: SingleChildScrollView(
-		  			child: CreateAccount(),
-		  		),
-		  	),
-		  );
+		return MultiProvider(
+			providers: [
+				ChangeNotifierProvider(create: (context) => UserProvider()),
+			],
+		  child: MaterialApp(
+		    	title: 'Travis',
+		    	debugShowCheckedModeBanner: false,
+		    	scrollBehavior: MyCustomScrollBehavior(),
+		    	theme: ThemeData(
+		    		primarySwatch: Colors.blue,
+		    	),
+		    	home: const Scaffold(
+		    		body: SingleChildScrollView(
+		    			child: CreateAccount(),
+		    		),
+		    	),
+		    ),
+		);
 	}
 }

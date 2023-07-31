@@ -8,11 +8,17 @@ class User with ChangeNotifier {
   User(this.name, this.email, this.password);
 }
 
+class UserProvider extends ChangeNotifier {
+  User? _user;
 
-//   void updateUserInfo({String? name, String? email, String? password}) {
-//     this.name = name ?? this.name;
-//     this.email = email ?? this.email;
-//     this.password = password ?? this.password;
-//     notifyListeners();
-//   }
-// }
+  User? get user => _user;
+
+  void setUser(User user) {
+    _user = user;
+    notifyListeners(); // 상태가 변경되었음을 리스너들에게 알립니다.
+  }
+}
+
+
+
+

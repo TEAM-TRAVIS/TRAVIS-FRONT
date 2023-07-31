@@ -21,19 +21,21 @@ class _ResultState extends State<Result> {
   late GoogleMapController mapController;
 
   final String url = "http://172.17.96.1:3000/gps/save";
-  // Map<String, dynamic> responseData = {};
   Future save(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
+    print(gpxString);
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
+    String test = "hello";
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
-            'Content-Type': 'application/gzip',
-            // 'Content-Type': 'application/json;charSet=UTF-8',
+            // 'Content-Type': 'application/gzip',
+            'Content-Type': 'application/json;charSet=UTF-8',
           },
           body: jsonEncode(<String, String>{
-            'body': gpxBase64,
+            // 'body': test,
+            'body' : gpxBase64,
           }),
       ); //post
       print(response.statusCode);
