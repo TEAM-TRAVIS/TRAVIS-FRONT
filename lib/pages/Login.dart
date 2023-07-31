@@ -7,13 +7,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:provider/provider.dart';
+
 class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
   State<Login> createState() => _LoginState();
 }
-
 class _LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -70,164 +71,167 @@ class _LoginState extends State<Login> {
   User user = User('', '', '');
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _hideKeyboard,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                const SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                ),
-                Text("TRAVIS",
-                  style: SafeGoogleFont(
-                    'MuseoModerno',
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
+    return ChangeNotifierProvider(
+      create: (context) => User(user.name, user.email, user.password),
+      child: GestureDetector(
+        onTap: _hideKeyboard,
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: Center(
+              child: Column(
+                children: [
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 50,
                   ),
-                ),
-                const SizedBox(
-                  width: double.infinity,
-                  height: 70,
-                ),
-                Text("Login",
-                  style: SafeGoogleFont(
-                    'Myanmar Khyay',
-                    fontSize: 27,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue[700],
+                  Text("TRAVIS",
+                    style: SafeGoogleFont(
+                      'MuseoModerno',
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[700],
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  width: double.infinity,
-                  height: 30,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40,0,40,0),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _emailController,
-                        focusNode: _emailFocusNode,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          user.email = value;
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'your_email@example.com',
-                          labelStyle: const TextStyle(
-                            color: Colors.black26,
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 70,
+                  ),
+                  Text("Login",
+                    style: SafeGoogleFont(
+                      'Myanmar Khyay',
+                      fontSize: 27,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blue[700],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 30,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(40,0,40,0),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _emailController,
+                          focusNode: _emailFocusNode,
+                          keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) {
+                            user.email = value;
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'your_email@example.com',
+                            labelStyle: const TextStyle(
+                              color: Colors.black26,
+                            ),
+                            hintText: 'Enter your email',
+                            prefixIcon: const Icon(Icons.email,
+                              color: Colors.blue,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.blue)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.blue)),
+                            errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red)),
+                            focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red)),
                           ),
-                          hintText: 'Enter your email',
-                          prefixIcon: const Icon(Icons.email,
-                            color: Colors.blue,
+                        ),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        TextFormField(
+                          controller: _passwordController,
+                          focusNode: _passwordFocusNode,
+                          obscureText: true,
+                          keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) {
+                            user.password = value;
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'type your password',
+                            labelStyle: const TextStyle(
+                              color: Colors.black26,
+                            ),
+                            hintText: 'Enter your password',
+                            prefixIcon: const Icon(Icons.key,
+                              color: Colors.blue,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.blue)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.blue)),
+                            errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red)),
+                            focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.red)),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.blue)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.blue)),
-                          errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.red)),
-                          focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: double.infinity,
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(265, 0, 0, 0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        save();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[800],
+                      ),
+                      child: const Text("Log in",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      TextFormField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocusNode,
-                        obscureText: true,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          user.password = value;
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          print("Forgot button clicked");
                         },
-                        decoration: InputDecoration(
-                          labelText: 'type your password',
-                          labelStyle: const TextStyle(
-                            color: Colors.black26,
+                        child: Text("Forgot Password?",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[600],
                           ),
-                          hintText: 'Enter your password',
-                          prefixIcon: const Icon(Icons.key,
-                            color: Colors.blue,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const Signup()));
+                        },
+                        child: Text("Sign up for Travis",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[600],
                           ),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.blue)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.blue)),
-                          errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.red)),
-                          focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Colors.red)),
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(
-                  width: double.infinity,
-                  height: 20,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(265, 0, 0, 0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      save();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[800],
-                    ),
-                    child: const Text("Log in",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        print("Forgot button clicked");
-                      },
-                      child: Text("Forgot Password?",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[600],
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => const Signup()));
-                      },
-                      child: Text("Sign up for Travis",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[600],
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

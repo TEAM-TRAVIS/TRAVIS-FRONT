@@ -344,6 +344,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path",
       "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.8.3",
       "packageUri": "lib/",
@@ -438,6 +444,12 @@
       "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/pointycastle-3.7.3",
       "packageUri": "lib/",
       "languageVersion": "2.14"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///C:/Users/Jongmin/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "quiver",
@@ -566,7 +578,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2023-07-27T23:38:01.143565Z",
+  "generated": "2023-07-29T00:50:55.223980Z",
   "generator": "pub",
   "generatorVersion": "3.0.6"
 }

@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
-import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:gpx/gpx.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -16,46 +20,40 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
 
-  // final String url = "http://172.17.96.1:3000/user/signup";
+  final String url = "http://172.17.96.1:3000/gps/save";
   // Map<String, dynamic> responseData = {};
-  // Future save() async {
-  //   try {
-  //     var res = await http.post(Uri.parse(url),
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json;charSet=UTF-8'
-  //         },
-  //         body: jsonEncode(<String, String>{
-  //           'name': user.name,
-  //           'email': user.email,
-  //           'password': user.password,
-  //         })); //post
-  //     print(res.statusCode);
-  //     if (res.statusCode == 201) {
-  //       Navigator.push(context, MaterialPageRoute(
-  //           builder: (context) => Login()));
-  //     } else if (res.statusCode == 400) {
-  //       responseData = jsonDecode(res.body);
-  //       String message = responseData['error'];
-  //       Fluttertoast.showToast(
-  //         msg: message,
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         timeInSecForIosWeb: 3,
-  //       );
-  //     } else {
-  //       print('요청에 실패하였습니다.');
-  //     }
-  //   } catch (e) {
-  //     print('오류 발생: $e');
-  //   }
-  // }
+  Future save(Gpx gpxData) async {
+    final gpxString = GpxWriter().asString(gpxData, pretty: true);
+    final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
+    final gpxBase64 = base64.encode(gpxGzip);
+    print("세이브 버튼 눌러서 출력해줬음");
+    // print(gpxString);
+    print(gpxGzip);
+    print(gpxBase64);
 
-  void printZoomLevel() async {
-    double zoomLevel = await mapController.getZoomLevel();
-    print('Current Zoom Level: $zoomLevel');
+    try {
+      var response = await http.post(Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/gzip',
+          },
+          body: gpxBase64,
+      ); //post
+      print(response);
+      print(response.statusCode);
+      print(response.body);
+    } catch (e) {
+      print('오류 발생: $e');
+    }
   }
+
+  // void printZoomLevel() async {
+  //   double zoomLevel = await mapController.getZoomLevel();
+  //   print('Current Zoom Level: $zoomLevel');
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final Gpx gpxData = ModalRoute.of(context)!.settings.arguments as Gpx;
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -85,7 +83,7 @@ class _ResultState extends State<Result> {
           actions: [
             TextButton(
               onPressed: () {
-                save();
+                save(gpxData);
               },
               child: Text("Save",
                 style: SafeGoogleFont(
@@ -112,7 +110,7 @@ class _ResultState extends State<Result> {
                 Polyline(
                     polylineId: const PolylineId("route"),
                     color: Colors.blue,
-                    width: 5,
+                    width: 8,
                     points: routeCoordinates
                 ),
               },
