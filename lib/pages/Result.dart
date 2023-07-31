@@ -10,6 +10,8 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
 
+import 'package:Travis/pages/MyPage.dart';
+
 class Result extends StatefulWidget {
   const Result({super.key});
 
@@ -84,6 +86,8 @@ class _ResultState extends State<Result> {
             TextButton(
               onPressed: () {
                 save(gpxData);
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => const MyPage()));
               },
               child: Text("Save",
                 style: SafeGoogleFont(

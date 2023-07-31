@@ -17,7 +17,6 @@ import 'package:gpx/gpx.dart';
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
-
 Gpx gpx = Gpx();
 
 class Map extends StatefulWidget {
@@ -34,6 +33,7 @@ class _MapState extends State<Map> {
   int milliseconds = 0;
   double totalDistance = 0.0;
   bool isTracking = false;
+  bool isRunning = false;
   LocationData? currentLocation; // LocationData 객체, LocationData는 사용자의 현재 위치 정보를 담는 클래스. 초기값으로 null을 할당하고 나중에 사용자의 위치 정보를 얻을때 값을 업데이트
 
   // State 객체가 생성된 직후에 호출되는 특별한 초기화 메서드
@@ -70,43 +70,41 @@ class _MapState extends State<Map> {
         .listen((LocationData locationData) { // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
       setState(() {
         currentLocation = locationData;
-        // isTracking 일때만 아래 로직 작동
-        if (isTracking) {
-          if(latmin > locationData.latitude!)
-          {
-            latmin = locationData.latitude!;
-          }
-          if(lonmin > locationData.longitude!)
-          {
-            lonmin = locationData.longitude!;
-          }
-          if(latmax < locationData.latitude!)
-          {
-            latmax = locationData.latitude!;
-          }
-          if(lonmax < locationData.longitude!)
-          {
-            lonmax = locationData.longitude!;
-          }
 
-          gpx.metadata = Metadata(
-            name: "asdfadsfa",//Provider.of<User>(context),
-          );
-          gpx.wpts.add(
-              Wpt(
-                lat: locationData.latitude!,
-                lon: locationData.longitude!,
-                ele: locationData.altitude!,
-                time: DateTime.now(),
-              )
-          );
-          // final gpxString = GpxWriter().asString(gpx, pretty: true);
-          // print(gpxString);
-          LatLng currentLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-          if (routeCoordinates.isNotEmpty) {
-            totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
+        if (isTracking) {
+          if (isRunning) {
+            if (latmin > locationData.latitude!) {
+              latmin = locationData.latitude!;
+            }
+            if (lonmin > locationData.longitude!) {
+              lonmin = locationData.longitude!;
+            }
+            if (latmax < locationData.latitude!) {
+              latmax = locationData.latitude!;
+            }
+            if (lonmax < locationData.longitude!) {
+              lonmax = locationData.longitude!;
+            }
+
+            gpx.metadata = Metadata(
+              name: 'Jongmin' // Provider.of<User>(context, listen: false).email,
+            );
+            gpx.wpts.add(
+                Wpt(
+                  lat: locationData.latitude!,
+                  lon: locationData.longitude!,
+                  ele: locationData.altitude!,
+                  time: DateTime.now(),
+                )
+            );
+            LatLng currentLatLng = LatLng(
+                locationData.latitude!, locationData.longitude!);
+            if (routeCoordinates.isNotEmpty) {
+              totalDistance +=
+                  calculateDistance(routeCoordinates.last, currentLatLng);
+            }
+            routeCoordinates.add(currentLatLng);
           }
-          routeCoordinates.add(currentLatLng);
         }
       });
       mapController.animateCamera(
@@ -149,24 +147,16 @@ class _MapState extends State<Map> {
 
   void stopTimer() {
     timer.cancel();
-    setState(() {
-      milliseconds = 0;
-    });
-    Navigator.push(context, MaterialPageRoute(
-        builder: (context) => const Result(),
-        settings: RouteSettings(arguments: gpx),
-    )
-    );
   }
 
   void toggleTimer() {
-    if (isTracking) {
-      stopTimer();
-    } else {
-      startTimer();
-    }
     setState(() {
-      isTracking = !isTracking;
+      isRunning = !isRunning;
+      if (isRunning) {
+        startTimer();
+      } else {
+        stopTimer();
+      }
     });
   }
 
@@ -183,237 +173,297 @@ class _MapState extends State<Map> {
       isTracking = false;
       totalDistance = calculateTotalDistance();
     });
-    // print(routeCoordinates);
-    // final gpxString = GpxWriter().asString(gpx, pretty: true);
-    // print(gpxString);
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => const Result(),
+      settings: RouteSettings(arguments: gpx),
+    )
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => User("jong","@fasdf","asdf"),
-      child: MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            title: Text("Record",
-              style: SafeGoogleFont(
-                'MuseoModerno',
-                fontSize: 21,
-                color: Colors.black,
-              ),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Record",
+            style: SafeGoogleFont(
+              'MuseoModerno',
+              fontSize: 21,
+              color: Colors.black,
             ),
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            elevation: 0.0,
-            leading: TextButton(
-              onPressed: () {
-                print("back button clicked");
-              },
-              child: Text("back",
-                style: SafeGoogleFont(
-                  'NanumGothic',
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  print(routeCoordinates);
-                  print("settings button clicked");
-                },
-                icon: Icon(Icons.settings,
-                  color: Colors.blue[500],
-                ),
-              ),
-            ],
           ),
-          body: Stack(
-            children: [
-              GoogleMap(
-                onMapCreated: (GoogleMapController controller) {
-                  mapController = controller;
-                },
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
-                  zoom: 15.0,
-                ),
-                polylines: <Polyline>{
-                  if (isTracking)
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0.0,
+          leading: TextButton(
+            onPressed: () {
+              print("back button clicked");
+            },
+            child: Text("back",
+              style: SafeGoogleFont(
+                'NanumGothic',
+                fontSize: 18,
+              ),
+            ),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                print(routeCoordinates);
+                print("settings button clicked");
+              },
+              icon: Icon(Icons.settings,
+                color: Colors.blue[500],
+              ),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            GoogleMap(
+              onMapCreated: (GoogleMapController controller) {
+                mapController = controller;
+              },
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
+                zoom: 15.0,
+              ),
+              polylines: <Polyline>{
+                if (isTracking)
+                  if (isRunning)
                     Polyline(
                         polylineId: const PolylineId("route"),
                         color: Colors.blue,
                         width: 8,
                         points: routeCoordinates
                     ),
-                },
-                zoomControlsEnabled: false,
-                markers: <Marker>{
-                  Marker(
-                    markerId: const MarkerId('currentLocation'),
-                    position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-                    infoWindow: const InfoWindow(title: 'My Location'),
-                  ),
-                },
+              },
+              zoomControlsEnabled: false,
+              markers: <Marker>{
+                Marker(
+                  markerId: const MarkerId('currentLocation'),
+                  position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+                  infoWindow: const InfoWindow(title: 'My Location'),
+                ),
+              },
+            ),
+            SlidingUpPanel(
+              minHeight: 70,
+              maxHeight: 225,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
-              SlidingUpPanel(
-                minHeight: 70,
-                maxHeight: 225,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+              boxShadow: const [
+                BoxShadow(
+                    blurRadius: 0
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                      blurRadius: 0
-                  ),
-                ],
-                header: Padding(
-                  padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: 100,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
-                      borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
-                      boxShadow: const [
-                        BoxShadow(
-                          blurRadius: 0,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                panel: Container(
-                  margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 235),
-                        child: Text("Travel path",
-                          style: SafeGoogleFont(
-                            'MuseoModerno',
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Divider(
-                        color: Color.fromARGB(255, 217, 217, 217),
-                        height: 1,
-                        thickness: 1,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          toggleTimer();
-                          isTracking ? _stopTracking : _startTracking;
-                        },
-                        style: isTracking?
-                        ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
-                            minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
-                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
-                        ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
-                            minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
-                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                        child: Text(isTracking ? 'Stop' : 'Start',
-                          style: SafeGoogleFont(
-                            'NanumGothic',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        child: Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        formatTime(),
-                                        style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const Divider(
-                                        color: Color.fromARGB(255, 217, 217, 217),
-                                        height: 1,
-                                        thickness: 1,
-                                      ),
-                                      Text("Time",
-                                        style: SafeGoogleFont(
-                                          'NanumGothic',
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.normal,
-                                          color: const Color.fromARGB(255, 163, 163, 163),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      isTracking ?
-                                      Text('${(totalDistance/1000).toStringAsFixed(1)}km',
-                                          style: SafeGoogleFont(
-                                              'MuseoModerno',
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.w500)) :
-                                      Text('0km',
-                                          style: SafeGoogleFont(
-                                              'MuseoModerno',
-                                              fontSize: 25,
-                                              fontWeight: FontWeight.w500)),
-                                      const Divider(
-                                        color: Color.fromARGB(255, 217, 217, 217),
-                                        height: 1,
-                                        thickness: 1,
-                                      ),
-                                      Text("Distance",
-                                        style: SafeGoogleFont(
-                                          'NanumGothic',
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.normal,
-                                          color: const Color.fromARGB(255, 163, 163, 163),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+              ],
+              header: Padding(
+                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 100,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
+                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 0,
                       ),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
+              panel: Container(
+                margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 235),
+                      child: Text("Travel path",
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Divider(
+                      color: Color.fromARGB(255, 217, 217, 217),
+                      height: 1,
+                      thickness: 1,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    isTracking? // isTracking == true -> 트래킹 중일때는 pause 버튼, stop 버튼
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                toggleTimer();
+                                print(isTracking);
+                                print(isRunning);
+                              },
+                              style: isRunning?
+                                ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
+                                  minimumSize: MaterialStateProperty.all(const Size(100, 38)),
+                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
+                                ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 83, 123, 248)),
+                                    minimumSize: MaterialStateProperty.all(const Size(100, 38)),
+                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                              child: isRunning?
+                                Text("Pause",
+                                  style: SafeGoogleFont(
+                                    'MuseoModerno',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ):
+                                Text("Resume",
+                                  style: SafeGoogleFont(
+                                    'MuseoModerno',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                toggleTimer();
+                                _stopTracking();
+                                print(isTracking);
+                                print(isRunning);
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
+                                fixedSize: MaterialStateProperty.all(const Size(100, 38)),
+                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                              child: Text("Stop",
+                                style: SafeGoogleFont(
+                                  'MuseoModerno',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ) :
+                      ElevatedButton(
+                        onPressed: () {
+                          toggleTimer();
+                          _startTracking();
+                          print(isTracking);
+                          print(isRunning);
+                        },
+                        style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
+                                minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
+                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                        child: Text("Start",
+                          style: SafeGoogleFont(
+                            'MudeoModerno',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500
+                          ),
+                        ),
+                      ),
+                    Container(
+                      child: Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      formatTime(),
+                                      style: SafeGoogleFont(
+                                        'MuseoModerno',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
+                                    ),
+                                    Text("Time",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 30,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    isTracking ?
+                                    Text('${(totalDistance/1000).toStringAsFixed(1)}km',
+                                        style: SafeGoogleFont(
+                                            'MuseoModerno',
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w500)) :
+                                    Text('0km',
+                                        style: SafeGoogleFont(
+                                            'MuseoModerno',
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w500)),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
+                                    ),
+                                    Text("Distance",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
