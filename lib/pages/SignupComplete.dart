@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../utils.dart';
-import '../pages/Map.dart';
+import 'package:Travis/pages/Map.dart';
+import 'package:Travis/utils.dart';
 
 class SignupComplete extends StatelessWidget {
   const SignupComplete({super.key});

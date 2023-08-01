@@ -1,27 +1,51 @@
+import 'package:Travis/User.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:flutter/material.dart';
-import 'package:myapp/utils.dart';
-import 'package:myapp/pages/CreateAccount.dart';
+import 'package:flutter/services.dart';
+import 'package:Travis/utils.dart';
+import 'package:Travis/pages/CreateAccount.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(const Travis());
+void main() async {
+	WidgetsFlutterBinding.ensureInitialized(); // 앱 초기화
+	await Permission.location.request();
+	runApp(const Travis());
+}
 
 class Travis extends StatelessWidget {
-  const Travis({super.key});
+	const Travis({super.key});
 
 	@override
 	Widget build(BuildContext context) {
-		return MaterialApp(
-			title: 'Travis',
-			debugShowCheckedModeBanner: false,
-			scrollBehavior: MyCustomScrollBehavior(),
-			theme: ThemeData(
-				primarySwatch: Colors.blue,
-			),
-			home: const Scaffold(
-			body: SingleChildScrollView(
-				child: CreateAccount(),
-				),
-			),
+		SystemChrome.setPreferredOrientations([
+			DeviceOrientation.portraitUp,
+			DeviceOrientation.portraitDown,
+		]);
+
+			// MultiProvider(
+			// providers: [
+			// 	ChangeNotifierProvider(create: (context) => ),
+			// 	ChangeNotifierProvider(create: (context) => ),
+			// ],
+		  // child:
+		return MultiProvider(
+			providers: [
+				ChangeNotifierProvider(create: (context) => UserProvider()),
+			],
+		  child: MaterialApp(
+		    	title: 'Travis',
+		    	debugShowCheckedModeBanner: false,
+		    	scrollBehavior: MyCustomScrollBehavior(),
+		    	theme: ThemeData(
+		    		primarySwatch: Colors.blue,
+		    	),
+		    	home: const Scaffold(
+		    		body: SingleChildScrollView(
+		    			child: CreateAccount(),
+		    		),
+		    	),
+		    ),
 		);
 	}
 }
-
