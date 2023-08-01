@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -27,7 +28,7 @@ class _ResultState extends State<Result> {
     print(gpxString);
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
-    String test = "hello";
+    // String test = "hello";
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -36,6 +37,7 @@ class _ResultState extends State<Result> {
           },
           body: jsonEncode(<String, String>{
             // 'body': test,
+            // 'time' :
             'body' : gpxBase64,
           }),
       ); //post
@@ -51,12 +53,17 @@ class _ResultState extends State<Result> {
   //   print('Current Zoom Level: $zoomLevel');
   // }
 
+  // Map map = const Map();
   @override
-  Map map = const Map();
   Widget build(BuildContext context) {
     final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
     final Gpx gpxData = args.gpx;
     final int milliseconds = args.milliseconds;
+    final totalDistance = args.totalDistance!;
+    Duration duration = Duration(milliseconds: milliseconds);
+    String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+    print(time);
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -173,79 +180,77 @@ class _ResultState extends State<Result> {
                       height: 1,
                       thickness: 1,
                     ),
-                    // Expanded(
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       Expanded(
-                    //         child: Center(
-                    //           child: Column(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             children: [
-                    //               Text(
-                    //                 toogleTimer();
-                    //                 style: SafeGoogleFont(
-                    //                   'MuseoModerno',
-                    //                   fontSize: 25,
-                    //                   fontWeight: FontWeight.w500,
-                    //                 ),
-                    //               ),
-                    //               const Divider(
-                    //                 color: Color.fromARGB(255, 217, 217, 217),
-                    //                 height: 1,
-                    //                 thickness: 1,
-                    //               ),
-                    //               Text("Time",
-                    //                 style: SafeGoogleFont(
-                    //                   'NanumGothic',
-                    //                   fontSize: 10,
-                    //                   fontWeight: FontWeight.normal,
-                    //                   color: const Color.fromARGB(255, 163, 163, 163),
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //       ),
-                    //       const SizedBox(
-                    //         width: 30,
-                    //       ),
-                    //       Expanded(
-                    //         child: Center(
-                    //           child: Column(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             children: [
-                    //               isTracking ?
-                    //               Text('${(totalDistance/1000).toStringAsFixed(1)}km',
-                    //                   style: SafeGoogleFont(
-                    //                       'MuseoModerno',
-                    //                       fontSize: 25,
-                    //                       fontWeight: FontWeight.w500)) :
-                    //               Text('0km',
-                    //                   style: SafeGoogleFont(
-                    //                       'MuseoModerno',
-                    //                       fontSize: 25,
-                    //                       fontWeight: FontWeight.w500)),
-                    //               const Divider(
-                    //                 color: Color.fromARGB(255, 217, 217, 217),
-                    //                 height: 1,
-                    //                 thickness: 1,
-                    //               ),
-                    //               Text("Distance",
-                    //                 style: SafeGoogleFont(
-                    //                   'NanumGothic',
-                    //                   fontSize: 10,
-                    //                   fontWeight: FontWeight.normal,
-                    //                   color: const Color.fromARGB(255, 163, 163, 163),
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    time,
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text("Time",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    // "hello",
+                                    '${(totalDistance/1000).toStringAsFixed(1)}km',
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text("Distance",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

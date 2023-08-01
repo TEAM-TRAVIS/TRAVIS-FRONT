@@ -1,7 +1,4 @@
-//import 'dart:js_util';
-
 import 'package:Travis/User.dart';
-import 'package:Travis/pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
@@ -175,7 +172,8 @@ class MapState extends State<Map> with ChangeNotifier {
       totalDistance = calculateTotalDistance();
     });
 
-    ResultArguments args = ResultArguments(gpx, milliseconds);
+    // ResultArguments args = ResultArguments(gpx, milliseconds);
+    ResultArguments args = ResultArguments(gpx, milliseconds, totalDistance);
     Navigator.push(
       context,
       MaterialPageRoute(
