@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:gpx/gpx.dart';
+import 'package:Travis/Arguments.dart';
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
@@ -173,10 +174,14 @@ class MapState extends State<Map> with ChangeNotifier {
       isTracking = false;
       totalDistance = calculateTotalDistance();
     });
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => const Result(),
-      settings: RouteSettings(arguments: gpx),
-    )
+
+    ResultArguments args = ResultArguments(gpx, milliseconds);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Result(),
+        settings: RouteSettings(arguments: args),
+      ),
     );
   }
 

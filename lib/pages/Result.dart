@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
 import 'package:Travis/pages/MyPage.dart';
+import 'package:Travis/Arguments.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -53,7 +54,9 @@ class _ResultState extends State<Result> {
   @override
   Map map = const Map();
   Widget build(BuildContext context) {
-    final Gpx gpxData = ModalRoute.of(context)!.settings.arguments as Gpx;
+    final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
+    final Gpx gpxData = args.gpx;
+    final int milliseconds = args.milliseconds;
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
