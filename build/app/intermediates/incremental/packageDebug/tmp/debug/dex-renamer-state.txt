@@ -1,4 +1,4 @@
-#Mon Jul 31 18:21:21 PDT 2023
+#Fri Aug 04 14:51:35 PDT 2023
 base.0=D\:\\flutter_project\\TRAVIS-FRONT\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=D\:\\flutter_project\\TRAVIS-FRONT\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
 base.2=D\:\\flutter_project\\TRAVIS-FRONT\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex

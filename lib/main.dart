@@ -22,12 +22,6 @@ class Travis extends StatelessWidget {
 			DeviceOrientation.portraitDown,
 		]);
 
-			// MultiProvider(
-			// providers: [
-			// 	ChangeNotifierProvider(create: (context) => ),
-			// 	ChangeNotifierProvider(create: (context) => ),
-			// ],
-		  // child:
 		return MultiProvider(
 			providers: [
 				ChangeNotifierProvider(create: (context) => UserProvider()),

@@ -35,7 +35,7 @@ class _LoginState extends State<Login> {
       ); //post
       print(res.statusCode);
       print(res);
-      if (res.statusCode == 302) {
+      if (res.statusCode == 200) {
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Map()));
       }
@@ -205,7 +205,7 @@ class _LoginState extends State<Login> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        print("Forgot button clicked");
+                        debugPrint("Forgot button clicked");
                       },
                       child: Text("Forgot Password?",
                         style: TextStyle(

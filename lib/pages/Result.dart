@@ -1,16 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Travis/User.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
 import 'package:Travis/pages/MyPage.dart';
 import 'package:Travis/Arguments.dart';
+import 'package:xml/xml.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -26,9 +29,18 @@ class _ResultState extends State<Result> {
   Future save(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     print(gpxString);
+    print("-------------");
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
-    // String test = "hello";
+
+    XmlDocument document = XmlDocument.parse(gpxString);
+    XmlNode emailnode = document.findAllElements('name').first;
+    String emailValue = emailnode.innerText;
+    XmlNode distnode = document.findAllElements('keywords').first;
+    String distValue = distnode.innerText;
+    XmlNode timenode = document.findAllElements('desc').first;
+    String timeValue = timenode.innerText;
+
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -36,9 +48,10 @@ class _ResultState extends State<Result> {
             'Content-Type': 'application/json;charSet=UTF-8',
           },
           body: jsonEncode(<String, String>{
-            // 'body': test,
-            // 'time' :
-            'body' : gpxBase64,
+            'email': emailValue,
+            'dist' : distValue,
+            'time' : timeValue,
+            'file' : gpxBase64,
           }),
       ); //post
       print(response.statusCode);
@@ -62,8 +75,6 @@ class _ResultState extends State<Result> {
     final totalDistance = args.totalDistance!;
     Duration duration = Duration(milliseconds: milliseconds);
     String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
-    print(time);
-
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -94,8 +105,8 @@ class _ResultState extends State<Result> {
             TextButton(
               onPressed: () {
                 save(gpxData);
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => const MyPage()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const MyPage()));
               },
               child: Text("Save",
                 style: SafeGoogleFont(
@@ -115,8 +126,10 @@ class _ResultState extends State<Result> {
               },
               //
               initialCameraPosition: CameraPosition(
-                target: LatLng(((latmax - latmin) /2 + latmin), ((lonmax - lonmin) /2 + lonmin)), // 초기 지도 중심 좌표
-                zoom: -log( max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+                target: LatLng(((latmax - latmin) / 2 + latmin),
+                    ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
+                zoom:
+                    -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
               ),
               polylines: <Polyline>{
                 Polyline(

@@ -352,6 +352,8 @@ class MapState extends State<Map> with ChangeNotifier {
                                 _stopTracking();
                                 gpx.metadata = Metadata(
                                   name: Provider.of<UserProvider>(context, listen: false).userEmail,
+                                  desc: milliseconds.toString(),
+                                  keywords: totalDistance.toString(),
                                   // name: "jongmin",
                                 );
                               },
