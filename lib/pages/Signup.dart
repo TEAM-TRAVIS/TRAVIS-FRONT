@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Signup extends StatefulWidget {
-  const Signup({Key? key}) : super(key: key);
+  const Signup({super.key});
 
   @override
   State<Signup> createState() => _SignupState();
@@ -24,7 +24,6 @@ class _SignupState extends State<Signup> {
   final FocusNode _passwordFocusNode = FocusNode();
 
   final String url = "http://172.17.96.1:3000/user/signup";
-  Map<String, dynamic> responseData = {};
   Future save() async {
     try {
       var response = await http.post(Uri.parse(url),
@@ -35,13 +34,17 @@ class _SignupState extends State<Signup> {
             'name': user.name,
             'email': user.email,
             'password': user.password,
-          })); //post
+          })
+      ); //post
+
       print(response.statusCode);
+      print(response.body);
+
       if (response.statusCode == 201) {
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Login()));
       } else if (response.statusCode == 400) {
-        responseData = jsonDecode(response.body);
+        Map<String, dynamic> responseData = jsonDecode(response.body);
         String message = responseData['error'];
         Fluttertoast.showToast(
           msg: message,
@@ -49,10 +52,10 @@ class _SignupState extends State<Signup> {
           timeInSecForIosWeb: 3,
         );
       } else {
-        print('요청에 실패하였습니다.');
+        debugPrint('요청에 실패하였습니다.');
       }
   } catch (e) {
-  print('오류 발생: $e');
+  debugPrint('오류 발생: $e');
   }
 }
 
@@ -254,10 +257,10 @@ class _SignupState extends State<Signup> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          print("ok");
+                          debugPrint("ok");
                           save();
                         } else {
-                          print("not ok");
+                          debugPrint("not ok");
                         }
                       },
                       style: ElevatedButton.styleFrom(

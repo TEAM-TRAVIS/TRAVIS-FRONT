@@ -49,7 +49,7 @@ class CreateAccount extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                      print("google button clicked");
+                      debugPrint("google button clicked");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -102,7 +102,7 @@ class CreateAccount extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    print("create account button clicked");
+                    debugPrint("create account button clicked");
                     Navigator.push(context, MaterialPageRoute(
                         builder: (context) => Signup()));
                   },

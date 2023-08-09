@@ -4,6 +4,7 @@ import 'package:Travis/User.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -28,8 +29,8 @@ class _ResultState extends State<Result> {
   final String url = "http://172.17.96.1:3000/gps/save";
   Future save(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
-    print(gpxString);
-    print("-------------");
+    debugPrint(gpxString);
+    debugPrint("-------------");
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
 
@@ -40,12 +41,15 @@ class _ResultState extends State<Result> {
     String distValue = distnode.innerText;
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
+    print("타임: $timeValue");
+    print("거리: $distValue");
+
 
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
             // 'Content-Type': 'application/gzip',
-            'Content-Type': 'application/json;charSet=UTF-8',
+            'Content-Type': 'application/json',
           },
           body: jsonEncode(<String, String>{
             'email': emailValue,
@@ -55,15 +59,25 @@ class _ResultState extends State<Result> {
           }),
       ); //post
       print(response.statusCode);
-      print(response.body);
+      debugPrint(response.body);
+      if (response.statusCode == 201) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MyPage()));
+      } else {
+        Fluttertoast.showToast(
+          msg: "Temporary network error occured!",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 3,
+        );
+      }
     } catch (e) {
-      print('오류 발생: $e');
+      debugPrint('오류 발생: $e');
     }
   }
 
-  // void printZoomLevel() async {
+  // void debugPrintZoomLevel() async {
   //   double zoomLevel = await mapController.getZoomLevel();
-  //   print('Current Zoom Level: $zoomLevel');
+  //   debugPrint('Current Zoom Level: $zoomLevel');
   // }
 
   // Map map = const Map();
@@ -105,8 +119,6 @@ class _ResultState extends State<Result> {
             TextButton(
               onPressed: () {
                 save(gpxData);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const MyPage()));
               },
               child: Text("Save",
                 style: SafeGoogleFont(

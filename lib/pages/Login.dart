@@ -40,17 +40,17 @@ class _LoginState extends State<Login> {
             builder: (context) => Map()));
       }
       else if (res.statusCode == 401) {
-        print('로그인 실패');
+        // debugPrint('로그인 실패');
         Fluttertoast.showToast(
           msg: "Check your email or password",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 3,
         );
       } else {
-        print('요청에 실패하였습니다.');
+        debugPrint('요청에 실패하였습니다.');
       }
     } catch (e) {
-      print('오류 발생: $e');
+      debugPrint('오류 발생: $e');
     }
   }
 
@@ -187,7 +187,7 @@ class _LoginState extends State<Login> {
                     onPressed: () {
                       save();
                       Provider.of<UserProvider>(context, listen: false).setUserInfo(user.email);
-                      // print("뿌르를르르르르르 ${user}");
+                      // debugPrint("뿌르를르르르르르 ${user}");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],

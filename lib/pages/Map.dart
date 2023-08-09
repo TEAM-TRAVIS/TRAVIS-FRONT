@@ -1,4 +1,5 @@
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
@@ -200,7 +201,7 @@ class MapState extends State<Map> with ChangeNotifier {
           elevation: 0.0,
           leading: TextButton(
             onPressed: () {
-              print("back button clicked");
+              debugPrint("back button clicked");
             },
             child: Text("back",
               style: SafeGoogleFont(
@@ -213,9 +214,21 @@ class MapState extends State<Map> with ChangeNotifier {
             IconButton(
               onPressed: () {
                 print(routeCoordinates);
-                print("settings button clicked");
+                debugPrint("settings button clicked");
               },
               icon: Icon(Icons.settings,
+                color: Colors.blue[500],
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => const MyPage()
+                    ));
+              },
+              icon: Icon(Icons.home,
                 color: Colors.blue[500],
               ),
             ),
@@ -313,8 +326,6 @@ class MapState extends State<Map> with ChangeNotifier {
                             child: ElevatedButton(
                               onPressed: () {
                                 toggleTimer();
-                                print(isTracking);
-                                print(isRunning);
                               },
                               style: isRunning?
                                 ButtonStyle(
@@ -352,9 +363,8 @@ class MapState extends State<Map> with ChangeNotifier {
                                 _stopTracking();
                                 gpx.metadata = Metadata(
                                   name: Provider.of<UserProvider>(context, listen: false).userEmail,
-                                  desc: milliseconds.toString(),
-                                  keywords: totalDistance.toString(),
-                                  // name: "jongmin",
+                                  desc: (milliseconds~/1000).toString(),
+                                  keywords: (totalDistance/1000).toStringAsFixed(1),
                                 );
                               },
                               style: ButtonStyle(
