@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:Travis/User.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -43,7 +41,6 @@ class _ResultState extends State<Result> {
     String timeValue = timenode.innerText;
     print("타임: $timeValue");
     print("거리: $distValue");
-
 
     try {
       var response = await http.post(Uri.parse(url),

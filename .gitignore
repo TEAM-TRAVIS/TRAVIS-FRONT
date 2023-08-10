@@ -23,3 +23,17 @@ build/app/outputs/apk/debug/app-debug.apk
 build/app/outputs/flutter-apk/app-debug.apk.sha1
 build/app/outputs/flutter-apk/app-debug.apk
 build/app/outputs/flutter-apk/app-debug.apk
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/.filecache
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/app.dill
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/debug_android_application.stamp
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/flutter_assets.d
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/kernel_snapshot.d
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/kernel_snapshot.stamp
+.flutter-plugins-dependencies
+*.dill
+*.bin
+*.json
+*.d
+*.txt
+*.apk
+*.sha1

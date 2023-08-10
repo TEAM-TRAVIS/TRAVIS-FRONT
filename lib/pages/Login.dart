@@ -187,7 +187,6 @@ class _LoginState extends State<Login> {
                     onPressed: () {
                       save();
                       Provider.of<UserProvider>(context, listen: false).setUserInfo(user.email);
-                      // debugPrint("뿌르를르르르르르 ${user}");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],

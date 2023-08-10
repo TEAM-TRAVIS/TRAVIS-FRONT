@@ -1,4 +1,5 @@
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
@@ -25,6 +26,7 @@ class Travis extends StatelessWidget {
 		return MultiProvider(
 			providers: [
 				ChangeNotifierProvider(create: (context) => UserProvider()),
+				ChangeNotifierProvider(create: (context) => DateProvider()),
 			],
 		  child: MaterialApp(
 		    	title: 'Travis',

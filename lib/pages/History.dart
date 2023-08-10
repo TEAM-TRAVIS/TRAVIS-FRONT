@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:Travis/pages/MyPage.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
@@ -45,11 +47,12 @@ class _HistoryState extends State<History> with ChangeNotifier {
         },
         body: jsonEncode(<String, String>{
           'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
-          'date': ModalRoute.of(context)!.settings.arguments as String,
+          'date': Provider.of<DateProvider>(context, listen: false).date!,
+          // 'date': ModalRoute.of(context)!.settings.arguments as String,
         }),
       ); //post
 
-      print(ModalRoute.of(context)!.settings.arguments);
+      // print(ModalRoute.of(context)!.settings.arguments);
       print(response.statusCode);
       // print(response.body);
 
@@ -63,29 +66,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
           List<int> zippedRoute = base64.decode(encodedString);
           List<int> decodedzip = gzip.decode(zippedRoute);
           gpxData = utf8.decode(decodedzip);
-          print(gpxData);
-
-          var document = XmlDocument.parse(gpxData);
-
-          final wptElements = document.findAllElements('wpt');
-          // print(wptElements.length);
-
-          for (final wptElement in wptElements) {
-            final latAttr = wptElement.getAttribute('lat');
-            // print(latAttr);
-            final lonAttr = wptElement.getAttribute('lon');
-            // print(lonAttr);
-
-            if (latAttr != null && lonAttr != null) {
-              final lat = double.tryParse(latAttr);
-              final lon = double.tryParse(lonAttr);
-              if (lat != null && lon != null) {
-                LatLng latlng = LatLng(lat, lon);
-                // print(latlng);
-                route.add(latlng);
-              }
-            }
-          }
+          // print("History 페이지의 gpxData: $gpxData");
+          parseGpx(gpxData);
         } catch (e) {
           print(e);
         }
@@ -95,40 +77,50 @@ class _HistoryState extends State<History> with ChangeNotifier {
     }
   }
 
-  // GpxData parseGpx(gpxData) {
-  //   final document = XmlDocument.parse(gpxData);
-  //   final route = <LatLng>[];
-  //   final wptElements = document.findAllElements('wpt');
-  //
-  //   for (final wptElement in wptElements) {
-  //     final latAttr = wptElement.getAttribute('lat');
-  //     final lonAttr = wptElement.getAttribute('lon');
-  //
-  //     if (latAttr != null && lonAttr != null) {
-  //       final lat = double.tryParse(latAttr);
-  //       final lon = double.tryParse(lonAttr);
-  //       if (lat != null && lon != null) {
-  //         LatLng latlng = LatLng(lat, lon);
-  //         print(latlng);
-  //         route.add(latlng);
-  //       }
-  //     }
-  //   }
-  //   return GpxData(route);
-  // }
+  void parseGpx(gpxData) {
+    final document = XmlDocument.parse(gpxData);
+    final wptElements = document.findAllElements('wpt');
+    try {
+      print(wptElements);
+    } catch (e) {
+      print("hi");
+    }
+    XmlNode metadataElement = document.findAllElements('metadata').first;
+    // print("부를르르르: $metadataElement");
+    XmlNode boundsElement = metadataElement.findElements('bounds').first;
+    // print("boundselement: $boundsElement");
 
-  // String reponseProcess() {
-  //   String? jsondecodedString = Provider.of<HistoryProvider>(context, listen: false).responseBody;
-  //   String? encodedString = jsondecodedString['gzipFile'];
-  //   // setState(() {
-  //   //   var encodedString = data['gzipFile'];
-  //   //   List<int> zippedRoute = base64.decode(encodedString);
-  //   //   GZipCodec gzip = GZipCodec();
-  //   //   List<int> decodedzip = gzip.decode(zippedRoute);
-  //   //   String gpxData = utf8.decode(decodedzip);
-  //   //   print(gpxData);
-  //   return ;
-  // }
+    final minLatAttr = boundsElement.getAttribute('minlat');
+    final minLonAttr = boundsElement.getAttribute('minlon');
+    final maxLatAttr = boundsElement.getAttribute('maxlat');
+    final maxLonAttr = boundsElement.getAttribute('maxlon');
+    // print("Qnfmfmfmffm: $minLatAttr");
+    // print(minLonAttr);
+    // print(maxLatAttr);
+    // print(maxLonAttr);
+
+    latmin = double.tryParse(minLatAttr!)!;
+    // print("dfjkdljfdklfj: $latmin");
+    lonmin = double.tryParse(minLonAttr!)!;
+    latmax = double.tryParse(maxLatAttr!)!;
+    lonmax = double.tryParse(maxLonAttr!)!;
+
+    setState(() {
+      for (final wptElement in wptElements) {
+        final latAttr = wptElement.getAttribute('lat');
+        final lonAttr = wptElement.getAttribute('lon');
+
+        if (latAttr != null && lonAttr != null) {
+          final lat = double.tryParse(latAttr);
+          final lon = double.tryParse(lonAttr);
+          if (lat != null && lon != null) {
+            LatLng latlng = LatLng(lat, lon);
+            route.add(latlng);
+          }
+        }
+      }
+    });
+  }
 
   String formatTime(seconds) {
     Duration duration = Duration(seconds: seconds);
@@ -137,13 +129,6 @@ class _HistoryState extends State<History> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
-    save(context);
-    // GpxData gpx = parseGpx(gpxData);
-    // List<LatLng> route = gpx.route;
-    // route.sort((a, b) => a.latitude.compareTo(b.latitude)); // latitude 값을 비교하여 오름차순으로 정렬
-    // var maxlat = route.sort((a, b) => a.latitude.compareTo(b.latitude)); // latitude 값을 비교하여 오름차순으로 정렬
-    // var minlon = route.sort((a, b) => a.longitude.compareTo(b.longitude)); // latitude 값을 비교하여 오름차순으로 정렬
-    // route.sort((a, b) => a.longitude.compareTo(b.longitude)); // latitude 값을 비교하여 오름차순으로 정렬
 
     return MaterialApp(
       home: Scaffold(
@@ -178,8 +163,12 @@ class _HistoryState extends State<History> with ChangeNotifier {
               onPressed: () {
                 print("share button clicked");
                 // print(gpxData);
-                print(route[0]);
-                print(route);
+                // print(route[0]);
+                print(gpxData);
+                print(latmin);
+                print(latmax);
+                print(lonmin);
+                print(lonmin);
                 // print(minlat);
                 // print(maxlon);
                 // print(route);
@@ -201,11 +190,10 @@ class _HistoryState extends State<History> with ChangeNotifier {
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
               },
-              initialCameraPosition: const CameraPosition(target: LatLng(37.801330, -122.403153), zoom: 5,
-                // target: LatLng(((latmax - latmin) / 2 + latmin),
-                //     ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
-                // zoom:
-                // -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(((latmax - latmin) / 2 + latmin),
+                    ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
+                zoom: -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
               ),
               polylines: <Polyline>{
                 for (int i = 0; i < route.length-1 ; i++)

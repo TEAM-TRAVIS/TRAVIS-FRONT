@@ -15,6 +15,17 @@ class MyPage extends StatefulWidget {
   State<MyPage> createState() => _MyPageState();
 }
 
+class DateProvider extends ChangeNotifier {
+  String? _date;
+
+  String? get date => _date;
+
+  void setDate(String date) {
+    _date = date;
+    notifyListeners();
+  }
+}
+
 class _MyPageState extends State<MyPage> with ChangeNotifier {
   double toDist = 0.0;
   int toTime = 0;
@@ -252,9 +263,10 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const History(),
-                                  settings: RouteSettings(arguments: date),
+                                  // settings: RouteSettings(arguments: date),
                                 ),
                           );
+                          Provider.of<DateProvider>(context, listen: false).setDate(date);
                           // print("뿔흐르를");
                           //debugPrint(userData[index]);
                         },
