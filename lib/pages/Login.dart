@@ -21,7 +21,7 @@ class _LoginState extends State<Login> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  final String url = "http://172.17.96.1:3000/user/login";
+  final String url = "http://44.218.14.132/user/login";
   Future save() async {
     try {
       var res = await http.post(Uri.parse(url),
@@ -34,7 +34,7 @@ class _LoginState extends State<Login> {
           })
       ); //post
       print(res.statusCode);
-      print(res);
+      print(res.body);
       if (res.statusCode == 200) {
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Map()));

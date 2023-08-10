@@ -41,7 +41,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     }
   }
 
-  final String url = "http://172.17.96.1:3000/gps/summary";
+  final String url = "http://44.218.14.132/gps/summary";
   Future save(BuildContext contexts) async {
     try {
       var response = await http.post(Uri.parse(url),
@@ -109,6 +109,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text("Travis",

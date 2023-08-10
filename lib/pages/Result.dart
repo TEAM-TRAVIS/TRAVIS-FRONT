@@ -24,7 +24,7 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
 
-  final String url = "http://172.17.96.1:3000/gps/save";
+  final String url = "http://44.218.14.132/gps/save";
   Future save(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     debugPrint(gpxString);
@@ -87,6 +87,7 @@ class _ResultState extends State<Result> {
     Duration duration = Duration(milliseconds: milliseconds);
     String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text("Result",
@@ -107,7 +108,7 @@ class _ResultState extends State<Result> {
             child: Text("Cancel",
               style: SafeGoogleFont(
                 'NanumGothic',
-                fontSize: 13,
+                fontSize: 12,
                 color: Colors.red,
               ),
             ),
@@ -120,7 +121,7 @@ class _ResultState extends State<Result> {
               child: Text("Save",
                 style: SafeGoogleFont(
                   'NanumGothic',
-                  fontSize: 18,
+                  fontSize: 15,
                   color: Colors.blue,
                 ),
               ),
@@ -183,8 +184,8 @@ class _ResultState extends State<Result> {
                 margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 235),
+                    Align(
+                      alignment: Alignment.centerLeft,
                       child: Text("Travel path",
                         style: SafeGoogleFont(
                           'MuseoModerno',

@@ -37,3 +37,11 @@ build/app/outputs/flutter-apk/app-debug.apk
 *.txt
 *.apk
 *.sha1
+.dart_tool/flutter_build/da8d64b5daea8c8d8ffabed84cea1f64/.filecache
+*.dill
+*.stamp
+.flutter-plugins-dependencies
+*.dill
+build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/2mrWizhxeWi+Wto58IgVq_GJBMU=
+build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/HKMGz54SZpwvn9zZvgbhmEu2zyo=
+*.so

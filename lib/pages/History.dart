@@ -38,7 +38,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
     route = [];
   }
 
-  final String url = "http://172.17.96.1:3000/gps/detail";
+  final String url = "http://44.218.14.132/gps/detail";
   Future save(BuildContext contexts) async {
     try {
       var response = await http.post(Uri.parse(url),
@@ -131,9 +131,10 @@ class _HistoryState extends State<History> with ChangeNotifier {
   Widget build(BuildContext context) {
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Result",
+          title: Text("History",
             style: SafeGoogleFont(
               'MuseoModerno',
               fontSize: 21,
@@ -153,7 +154,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
               "Back",
               style: SafeGoogleFont(
                 'NanumGothic',
-                fontSize: 13,
+                fontSize: 15,
                 color: Colors.red,
               ),
             ),
@@ -164,11 +165,11 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 print("share button clicked");
                 // print(gpxData);
                 // print(route[0]);
-                print(gpxData);
-                print(latmin);
-                print(latmax);
-                print(lonmin);
-                print(lonmin);
+                // print(gpxData);
+                // print(latmin);
+                // print(latmax);
+                // print(lonmin);
+                // print(lonmin);
                 // print(minlat);
                 // print(maxlon);
                 // print(route);
@@ -177,7 +178,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 "Share",
                 style: SafeGoogleFont(
                   'NanumGothic',
-                  fontSize: 18,
+                  fontSize: 15,
                   color: Colors.blue,
                 ),
               ),
@@ -247,8 +248,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 235),
+                    Align(
+                      alignment: Alignment.centerLeft,
                       child: Text("Travel path",
                         style: SafeGoogleFont(
                           'MuseoModerno',

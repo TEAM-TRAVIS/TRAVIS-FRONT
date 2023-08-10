@@ -3,6 +3,7 @@ import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -29,6 +30,7 @@ class Map extends StatefulWidget {
 class MapState extends State<Map> with ChangeNotifier {
   late GoogleMapController mapController;
   late Timer timer;
+  DateTime? currentBackPressTime;
   int milliseconds = 0;
   double totalDistance = 0.0;
   bool isTracking = false;
@@ -124,7 +126,7 @@ class MapState extends State<Map> with ChangeNotifier {
   }
 
   double calculateTotalDistance() {
-    double totalDistance = 0.0;
+    // double totalDistance = 0.0;
     for (int i = 0; i < routeCoordinates.length - 1; i++) {
       totalDistance += calculateDistance(routeCoordinates[i], routeCoordinates[i + 1]);
     }
@@ -178,15 +180,28 @@ class MapState extends State<Map> with ChangeNotifier {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Result(),
+        builder: (context) => const Result(),
         settings: RouteSettings(arguments: args),
       ),
     );
   }
 
+  Future<bool> onWillPop() async {
+    DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime!) > const Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      const msg = "'뒤로'버튼을 한 번 더 누르면 종료됩니다.";
+      Fluttertoast.showToast(msg: msg);
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text("Record",
@@ -206,7 +221,7 @@ class MapState extends State<Map> with ChangeNotifier {
             child: Text("back",
               style: SafeGoogleFont(
                 'NanumGothic',
-                fontSize: 18,
+                fontSize: 15,
               ),
             ),
           ),
@@ -234,251 +249,256 @@ class MapState extends State<Map> with ChangeNotifier {
             ),
           ],
         ),
-        body: Stack(
-          children: [
-            GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                mapController = controller;
-              },
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
-                zoom: 15.0,
-              ),
-              polylines: <Polyline>{
-                if (isTracking)
-                  if (isRunning)
-                    Polyline(
-                        polylineId: const PolylineId("route"),
-                        color: Colors.blue,
-                        width: 8,
-                        points: routeCoordinates
-                    ),
-              },
-              zoomControlsEnabled: false,
-              markers: <Marker>{
-                Marker(
-                  markerId: const MarkerId('currentLocation'),
-                  position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-                  infoWindow: const InfoWindow(title: 'My Location'),
+        body: WillPopScope(
+          onWillPop: () {
+            return onWillPop();
+          },
+          child: Stack(
+            children: [
+              GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  mapController = controller;
+                },
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(37.7749, -122.4194), // 초기 지도 중심 좌표
+                  zoom: 15.0,
                 ),
-              },
-            ),
-            SlidingUpPanel(
-              minHeight: 70,
-              maxHeight: 225,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-              boxShadow: const [
-                BoxShadow(
-                    blurRadius: 0
-                ),
-              ],
-              header: Padding(
-                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
-                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 0,
+                polylines: <Polyline>{
+                  if (isTracking)
+                    if (isRunning)
+                      Polyline(
+                          polylineId: const PolylineId("route"),
+                          color: Colors.blue,
+                          width: 8,
+                          points: routeCoordinates
                       ),
-                    ],
+                },
+                zoomControlsEnabled: false,
+                markers: <Marker>{
+                  Marker(
+                    markerId: const MarkerId('currentLocation'),
+                    position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+                    infoWindow: const InfoWindow(title: 'My Location'),
+                  ),
+                },
+              ),
+              SlidingUpPanel(
+                minHeight: 70,
+                maxHeight: 225,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                      blurRadius: 0
+                  ),
+                ],
+                header: Padding(
+                  padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: 100,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
+                      borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              panel: Container(
-                margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 235),
-                      child: Text("Travel path",
-                        style: SafeGoogleFont(
-                          'MuseoModerno',
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Divider(
-                      color: Color.fromARGB(255, 217, 217, 217),
-                      height: 1,
-                      thickness: 1,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    isTracking? // isTracking == true -> 트래킹 중일때는 pause 버튼, stop 버튼
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                toggleTimer();
-                              },
-                              style: isRunning?
-                                ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
-                                  minimumSize: MaterialStateProperty.all(const Size(100, 38)),
-                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
-                                ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 83, 123, 248)),
-                                    minimumSize: MaterialStateProperty.all(const Size(100, 38)),
-                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                              child: isRunning?
-                                Text("Pause",
-                                  style: SafeGoogleFont(
-                                    'MuseoModerno',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ):
-                                Text("Resume",
-                                  style: SafeGoogleFont(
-                                    'MuseoModerno',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                toggleTimer();
-                                _stopTracking();
-                                gpx.metadata = Metadata(
-                                  name: Provider.of<UserProvider>(context, listen: false).userEmail,
-                                  desc: (milliseconds~/1000).toString(),
-                                  keywords: (totalDistance/1000).toStringAsFixed(1),
-                                );
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
-                                fixedSize: MaterialStateProperty.all(const Size(100, 38)),
-                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                              child: Text("Stop",
-                                style: SafeGoogleFont(
-                                  'MuseoModerno',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ) :
-                      ElevatedButton(
-                        onPressed: () {
-                          toggleTimer();
-                          _startTracking();
-                        },
-                        style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
-                                minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
-                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                        child: Text("Start",
+                panel: Container(
+                  margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text("Travel path",
                           style: SafeGoogleFont(
-                            'MudeoModerno',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500
+                            'MuseoModerno',
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                       ),
-                    Container(
-                      child: Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Divider(
+                        color: Color.fromARGB(255, 217, 217, 217),
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      isTracking? // isTracking == true -> 트래킹 중일때는 pause 버튼, stop 버튼
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      formatTime(),
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  toggleTimer();
+                                },
+                                style: isRunning?
+                                  ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
+                                    minimumSize: MaterialStateProperty.all(const Size(100, 38)),
+                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
+                                  ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 83, 123, 248)),
+                                      minimumSize: MaterialStateProperty.all(const Size(100, 38)),
+                                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                                child: isRunning?
+                                  Text("Pause",
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    const Divider(
-                                      color: Color.fromARGB(255, 217, 217, 217),
-                                      height: 1,
-                                      thickness: 1,
+                                  ):
+                                  Text("Resume",
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    Text("Time",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.normal,
-                                        color: const Color.fromARGB(255, 163, 163, 163),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
                               ),
                             ),
                             const SizedBox(
                               width: 30,
                             ),
                             Expanded(
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    isTracking ?
-                                    Text('${(totalDistance/1000).toStringAsFixed(1)}km',
-                                        style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.w500)) :
-                                    Text('0km',
-                                        style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.w500)),
-                                    const Divider(
-                                      color: Color.fromARGB(255, 217, 217, 217),
-                                      height: 1,
-                                      thickness: 1,
-                                    ),
-                                    Text("Distance",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.normal,
-                                        color: const Color.fromARGB(255, 163, 163, 163),
-                                      ),
-                                    ),
-                                  ],
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  toggleTimer();
+                                  _stopTracking();
+                                  gpx.metadata = Metadata(
+                                    name: Provider.of<UserProvider>(context, listen: false).userEmail,
+                                    desc: (milliseconds~/1000).toString(),
+                                    keywords: (totalDistance/1000).toStringAsFixed(1),
+                                  );
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
+                                  fixedSize: MaterialStateProperty.all(const Size(100, 38)),
+                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                                child: Text("Stop",
+                                  style: SafeGoogleFont(
+                                    'MuseoModerno',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
+                        ) :
+                        ElevatedButton(
+                          onPressed: () {
+                            toggleTimer();
+                            _startTracking();
+                          },
+                          style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
+                                  minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
+                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                          child: Text("Start",
+                            style: SafeGoogleFont(
+                              'MudeoModerno',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500
+                            ),
+                          ),
+                        ),
+                      Container(
+                        child: Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        formatTime(),
+                                        style: SafeGoogleFont(
+                                          'MuseoModerno',
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const Divider(
+                                        color: Color.fromARGB(255, 217, 217, 217),
+                                        height: 1,
+                                        thickness: 1,
+                                      ),
+                                      Text("Time",
+                                        style: SafeGoogleFont(
+                                          'NanumGothic',
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.normal,
+                                          color: const Color.fromARGB(255, 163, 163, 163),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 30,
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      isTracking ?
+                                      Text('${(totalDistance/1000).toStringAsFixed(1)}km',
+                                          style: SafeGoogleFont(
+                                              'MuseoModerno',
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w500)) :
+                                      Text('0km',
+                                          style: SafeGoogleFont(
+                                              'MuseoModerno',
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w500)),
+                                      const Divider(
+                                        color: Color.fromARGB(255, 217, 217, 217),
+                                        height: 1,
+                                        thickness: 1,
+                                      ),
+                                      Text("Distance",
+                                        style: SafeGoogleFont(
+                                          'NanumGothic',
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.normal,
+                                          color: const Color.fromARGB(255, 163, 163, 163),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
