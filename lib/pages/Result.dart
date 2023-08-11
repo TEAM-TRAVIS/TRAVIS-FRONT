@@ -27,12 +27,13 @@ class _ResultState extends State<Result> {
   final String url = "http://44.218.14.132/gps/save";
   Future save(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
-    debugPrint(gpxString);
+    debugPrint("GpxString 출력결과: $gpxString");
     debugPrint("-------------");
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
 
     XmlDocument document = XmlDocument.parse(gpxString);
+    print(document);
     XmlNode emailnode = document.findAllElements('name').first;
     String emailValue = emailnode.innerText;
     XmlNode distnode = document.findAllElements('keywords').first;
@@ -45,7 +46,6 @@ class _ResultState extends State<Result> {
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
-            // 'Content-Type': 'application/gzip',
             'Content-Type': 'application/json',
           },
           body: jsonEncode(<String, String>{

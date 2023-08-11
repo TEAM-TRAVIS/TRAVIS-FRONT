@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Travis/pages/History.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/NoHistroy.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -55,7 +56,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
 
       print("마이페이지 post");
       print(response.statusCode);
-      print(response.body);
+      // print(response.body);
       print("------------------");
       // var data = jsonDecode(response.body);
       // print(data);
@@ -70,8 +71,9 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
         try {
           var data = jsonDecode(response.body);
           setState(() {
-            toDist = data['to_dist'];
+            toDist = data['to_dist'].toDouble();
             toTime = data['to_time'];
+            print(toDist);
             print("제대로 들어왔다");
 
             userData = data['userData'];
@@ -260,16 +262,23 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                       var time = userData[index]['time'];
                       return GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const History(),
-                                  // settings: RouteSettings(arguments: date),
-                                ),
-                          );
-                          Provider.of<DateProvider>(context, listen: false).setDate(date);
-                          // print("뿔흐르를");
-                          //debugPrint(userData[index]);
+                          if (dist != 0 && time != 0) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const History(),
+                              ),
+                            );
+                            Provider.of<DateProvider>(context, listen: false)
+                              .setDate(date);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NoHistory(),
+                              ),
+                            );
+                          }
                         },
                         child: Card(
                           child: Row(

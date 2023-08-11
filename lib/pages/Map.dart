@@ -383,7 +383,8 @@ class MapState extends State<Map> with ChangeNotifier {
                                   gpx.metadata = Metadata(
                                     name: Provider.of<UserProvider>(context, listen: false).userEmail,
                                     desc: (milliseconds~/1000).toString(),
-                                    keywords: (totalDistance/1000).toStringAsFixed(1),
+                                    // keywords: (totalDistance/1000).toStringAsFixed(1),
+                                    keywords: (totalDistance/1000).toString(),
                                   );
                                 },
                                 style: ButtonStyle(

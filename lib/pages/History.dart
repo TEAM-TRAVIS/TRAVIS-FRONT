@@ -20,15 +20,10 @@ class History extends StatefulWidget {
   State<History> createState() => _HistoryState();
 }
 
-// class GpxData {
-//   final List<LatLng> route;
-//
-//   GpxData(this.route);
-// }
-
 class _HistoryState extends State<History> with ChangeNotifier {
   late GoogleMapController mapController;
-  String gpxData = "";
+  // String gpxData = "";
+  late String? gpxData;
   List<LatLng> route = [];
 
   @override
@@ -39,20 +34,20 @@ class _HistoryState extends State<History> with ChangeNotifier {
   }
 
   final String url = "http://44.218.14.132/gps/detail";
+
   Future save(BuildContext contexts) async {
     try {
-      var response = await http.post(Uri.parse(url),
+      var response = await http.post(
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json;charSet=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
           'date': Provider.of<DateProvider>(context, listen: false).date!,
-          // 'date': ModalRoute.of(context)!.settings.arguments as String,
         }),
       ); //post
 
-      // print(ModalRoute.of(context)!.settings.arguments);
       print(response.statusCode);
       // print(response.body);
 
@@ -66,7 +61,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
           List<int> zippedRoute = base64.decode(encodedString);
           List<int> decodedzip = gzip.decode(zippedRoute);
           gpxData = utf8.decode(decodedzip);
-          // print("History 페이지의 gpxData: $gpxData");
+          print("History 페이지의 gpxData: $gpxData");
           parseGpx(gpxData);
         } catch (e) {
           print(e);
@@ -78,48 +73,42 @@ class _HistoryState extends State<History> with ChangeNotifier {
   }
 
   void parseGpx(gpxData) {
-    final document = XmlDocument.parse(gpxData);
-    final wptElements = document.findAllElements('wpt');
     try {
-      print(wptElements);
-    } catch (e) {
-      print("hi");
-    }
-    XmlNode metadataElement = document.findAllElements('metadata').first;
-    // print("부를르르르: $metadataElement");
-    XmlNode boundsElement = metadataElement.findElements('bounds').first;
-    // print("boundselement: $boundsElement");
+      print("parseGpx 하겠습니다.");
+      final document = XmlDocument.parse(gpxData);
+      final wptElements = document.findAllElements('wpt');
 
-    final minLatAttr = boundsElement.getAttribute('minlat');
-    final minLonAttr = boundsElement.getAttribute('minlon');
-    final maxLatAttr = boundsElement.getAttribute('maxlat');
-    final maxLonAttr = boundsElement.getAttribute('maxlon');
-    // print("Qnfmfmfmffm: $minLatAttr");
-    // print(minLonAttr);
-    // print(maxLatAttr);
-    // print(maxLonAttr);
+      XmlNode metadataElement = document.findAllElements('metadata').first;
+      XmlNode boundsElement = metadataElement.findElements('bounds').first;
 
-    latmin = double.tryParse(minLatAttr!)!;
-    // print("dfjkdljfdklfj: $latmin");
-    lonmin = double.tryParse(minLonAttr!)!;
-    latmax = double.tryParse(maxLatAttr!)!;
-    lonmax = double.tryParse(maxLonAttr!)!;
+      final minLatAttr = boundsElement.getAttribute('minlat');
+      final minLonAttr = boundsElement.getAttribute('minlon');
+      final maxLatAttr = boundsElement.getAttribute('maxlat');
+      final maxLonAttr = boundsElement.getAttribute('maxlon');
 
-    setState(() {
-      for (final wptElement in wptElements) {
-        final latAttr = wptElement.getAttribute('lat');
-        final lonAttr = wptElement.getAttribute('lon');
+      latmin = double.tryParse(minLatAttr!)!;
+      lonmin = double.tryParse(minLonAttr!)!;
+      latmax = double.tryParse(maxLatAttr!)!;
+      lonmax = double.tryParse(maxLonAttr!)!;
 
-        if (latAttr != null && lonAttr != null) {
-          final lat = double.tryParse(latAttr);
-          final lon = double.tryParse(lonAttr);
-          if (lat != null && lon != null) {
-            LatLng latlng = LatLng(lat, lon);
-            route.add(latlng);
+      setState(() {
+        for (final wptElement in wptElements) {
+          final latAttr = wptElement.getAttribute('lat');
+          final lonAttr = wptElement.getAttribute('lon');
+
+          if (latAttr != null && lonAttr != null) {
+            final lat = double.tryParse(latAttr);
+            final lon = double.tryParse(lonAttr);
+            if (lat != null && lon != null) {
+              LatLng latlng = LatLng(lat, lon);
+              route.add(latlng);
+            }
           }
         }
-      }
-    });
+      });
+    } catch (e) {
+      print("파싱이 안된것같습니다.");
+    }
   }
 
   String formatTime(seconds) {
@@ -129,12 +118,12 @@ class _HistoryState extends State<History> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("History",
+          title: Text(
+            "History",
             style: SafeGoogleFont(
               'MuseoModerno',
               fontSize: 21,
@@ -146,9 +135,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
           elevation: 0.0,
           leading: TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => const MyPage())
-              );
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const MyPage()));
             },
             child: Text(
               "Back",
@@ -172,7 +160,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 // print(lonmin);
                 // print(minlat);
                 // print(maxlon);
-                // print(route);
+                print(route);
               },
               child: Text(
                 "Share",
@@ -194,15 +182,16 @@ class _HistoryState extends State<History> with ChangeNotifier {
               initialCameraPosition: CameraPosition(
                 target: LatLng(((latmax - latmin) / 2 + latmin),
                     ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
-                zoom: -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+                zoom:
+                    -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
               ),
               polylines: <Polyline>{
-                for (int i = 0; i < route.length-1 ; i++)
+                for (int i = 0; i < route.length - 1; i++)
                   Polyline(
                     polylineId: PolylineId("route_$i"),
                     color: Colors.blue,
                     width: 5,
-                    points: [route[i], route[i+1]],
+                    points: [route[i], route[i + 1]],
                   ),
               },
               //     <Polyline>{
@@ -223,9 +212,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 topRight: Radius.circular(30),
               ),
               boxShadow: const [
-                BoxShadow(
-                    blurRadius: 0
-                ),
+                BoxShadow(blurRadius: 0),
               ],
               header: Padding(
                 padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
@@ -250,7 +237,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Travel path",
+                      child: Text(
+                        "Travel path",
                         style: SafeGoogleFont(
                           'MuseoModerno',
                           fontSize: 25,
@@ -290,12 +278,14 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                     height: 1,
                                     thickness: 1,
                                   ),
-                                  Text("Time",
+                                  Text(
+                                    "Time",
                                     style: SafeGoogleFont(
                                       'NanumGothic',
                                       fontSize: 10,
                                       fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                      color: const Color.fromARGB(
+                                          255, 163, 163, 163),
                                     ),
                                   ),
                                 ],
@@ -324,12 +314,14 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                     height: 1,
                                     thickness: 1,
                                   ),
-                                  Text("Distance",
+                                  Text(
+                                    "Distance",
                                     style: SafeGoogleFont(
                                       'NanumGothic',
                                       fontSize: 10,
                                       fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                      color: const Color.fromARGB(
+                                          255, 163, 163, 163),
                                     ),
                                   ),
                                 ],
