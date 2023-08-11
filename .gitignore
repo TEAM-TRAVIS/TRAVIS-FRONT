@@ -36,3 +36,6 @@
 build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/2mrWizhxeWi+Wto58IgVq_GJBMU=
 build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/HKMGz54SZpwvn9zZvgbhmEu2zyo=
 *.so
+*.xml
+*.xcconfig
+*.sh
