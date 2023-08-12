@@ -22,7 +22,6 @@ class History extends StatefulWidget {
 
 class _HistoryState extends State<History> with ChangeNotifier {
   late GoogleMapController mapController;
-  // String gpxData = "";
   late String? gpxData;
   List<LatLng> route = [];
 
@@ -55,7 +54,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
         GZipCodec gzip = GZipCodec();
         print("History 페이지에 들어왔습니다.");
         try {
-          print("네 반갑습니다");
+          print("제대로 들어왔습니다.");
           var data = jsonDecode(response.body);
           var encodedString = data['gzipFile'];
           List<int> zippedRoute = base64.decode(encodedString);
@@ -154,12 +153,10 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 // print(gpxData);
                 // print(route[0]);
                 // print(gpxData);
-                // print(latmin);
-                // print(latmax);
-                // print(lonmin);
-                // print(lonmin);
-                // print(minlat);
-                // print(maxlon);
+                print(latmin);
+                print(latmax);
+                print(lonmin);
+                print(lonmax);
                 print(route);
               },
               child: Text(
@@ -194,14 +191,6 @@ class _HistoryState extends State<History> with ChangeNotifier {
                     points: [route[i], route[i + 1]],
                   ),
               },
-              //     <Polyline>{
-              //   Polyline(
-              //       polylineId: const PolylineId("route"),
-              //       color: Colors.blue,
-              //       width: 5,
-              //       points: route,
-              //   ),
-              // },
               zoomControlsEnabled: false,
             ),
             SlidingUpPanel(
