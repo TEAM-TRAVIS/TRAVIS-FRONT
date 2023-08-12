@@ -126,7 +126,6 @@ class MapState extends State<Map> with ChangeNotifier {
   }
 
   double calculateTotalDistance() {
-    // double totalDistance = 0.0;
     for (int i = 0; i < routeCoordinates.length - 1; i++) {
       totalDistance += calculateDistance(routeCoordinates[i], routeCoordinates[i + 1]);
     }
@@ -175,15 +174,23 @@ class MapState extends State<Map> with ChangeNotifier {
       totalDistance = calculateTotalDistance();
     });
 
-    // ResultArguments args = ResultArguments(gpx, milliseconds);
     ResultArguments args = ResultArguments(gpx, milliseconds, totalDistance);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const Result(),
-        settings: RouteSettings(arguments: args),
-      ),
-    );
+    if (totalDistance != 0 && milliseconds != 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Result(),
+          settings: RouteSettings(arguments: args),
+        ),
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: "Invalid data entered!",
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIosWeb: 3,
+      );
+    }
+
   }
 
   Future<bool> onWillPop() async {
@@ -380,10 +387,10 @@ class MapState extends State<Map> with ChangeNotifier {
                                 onPressed: () {
                                   toggleTimer();
                                   _stopTracking();
+
                                   gpx.metadata = Metadata(
                                     name: Provider.of<UserProvider>(context, listen: false).userEmail,
                                     desc: (milliseconds~/1000).toString(),
-                                    // keywords: (totalDistance/1000).toStringAsFixed(1),
                                     keywords: (totalDistance/1000).toString(),
                                     bounds: Bounds(
                                       minlat: latmin,
