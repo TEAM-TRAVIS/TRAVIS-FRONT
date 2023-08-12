@@ -385,6 +385,12 @@ class MapState extends State<Map> with ChangeNotifier {
                                     desc: (milliseconds~/1000).toString(),
                                     // keywords: (totalDistance/1000).toStringAsFixed(1),
                                     keywords: (totalDistance/1000).toString(),
+                                    bounds: Bounds(
+                                      minlat: latmin,
+                                      minlon: lonmin,
+                                      maxlat: latmax,
+                                      maxlon: lonmax,
+                                    ),
                                   );
                                 },
                                 style: ButtonStyle(
