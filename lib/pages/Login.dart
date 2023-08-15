@@ -36,8 +36,10 @@ class _LoginState extends State<Login> {
       print(res.statusCode);
       print(res.body);
       if (res.statusCode == 200) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (context) => Map()));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+          builder: (BuildContext context) => Map()
+        ),
+        (route) => false);
       }
       else if (res.statusCode == 401) {
         // debugPrint('로그인 실패');
