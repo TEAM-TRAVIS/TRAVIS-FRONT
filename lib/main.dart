@@ -1,5 +1,6 @@
 import 'package:Travis/User.dart';
 import 'package:Travis/pages/MyPage.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
@@ -35,6 +36,10 @@ class Travis extends StatelessWidget {
 		    	theme: ThemeData(
 		    		primarySwatch: Colors.blue,
 		    	),
+					routes: {
+						'Map' : (BuildContext context) => Map(),
+						'MyPage' : (BuildContext context) => MyPage(),
+					},
 		    	home: const Scaffold(
 		    		body: SingleChildScrollView(
 		    			child: CreateAccount(),
