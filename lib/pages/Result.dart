@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:Travis/pages/Map.dart';
+import 'package:flutter/material.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,7 +10,6 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
-import 'package:Travis/pages/MyPage.dart';
 import 'package:Travis/Arguments.dart';
 import 'package:xml/xml.dart';
 
@@ -58,9 +57,8 @@ class _ResultState extends State<Result> {
       print(response.statusCode);
       debugPrint(response.body);
       if (response.statusCode == 201) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const MyPage()));
-      } else {
+        Navigator.popAndPushNamed(context, 'MyPage');
+    } else {
         Fluttertoast.showToast(
           msg: "Temporary network error occured!",
           toastLength: Toast.LENGTH_SHORT,
@@ -83,7 +81,7 @@ class _ResultState extends State<Result> {
     final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
     final Gpx gpxData = args.gpx;
     final int milliseconds = args.milliseconds;
-    final totalDistance = args.totalDistance!;
+    final totalDistance = args.totalDistance;
     Duration duration = Duration(milliseconds: milliseconds);
     String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
     return MaterialApp(
