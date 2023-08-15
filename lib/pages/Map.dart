@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,7 +26,6 @@ class Map extends StatefulWidget {
   MapState createState() => MapState();
 }
 
-// 이 클래스는 지도를 표시하고, 사용자의 현재 위치를 얻어서 currentLocation 변수에 저장하며, 지도 상의 경로를 routeCoordinates 리스트에 저장하는 기능을 수행.
 class MapState extends State<Map> with ChangeNotifier {
   late GoogleMapController mapController;
   late Timer timer;
@@ -35,12 +34,12 @@ class MapState extends State<Map> with ChangeNotifier {
   double totalDistance = 0.0;
   bool isTracking = false;
   bool isRunning = false;
+  static double fabHeight = 300;
   LocationData? currentLocation = LocationData.fromMap({
     "latitude": 37.7749,
     "longitude": -122.4194,
   });
 
-  // State 객체가 생성된 직후에 호출되는 특별한 초기화 메서드
   @override
   void initState() {
     super.initState();
@@ -48,12 +47,10 @@ class MapState extends State<Map> with ChangeNotifier {
     initLocation();
   }
 
-  // 위치 권한이 있는지 확인하고 없으면 위치 권한을 받는 함수
   void initLocation() async {
-    // initstate에 의해서만 호출됨
-    Location location = Location(); //Location은 gps 위치를 받아오는 '클래스' location은 객체 즉 객체 생성
-    bool serviceEnabled; // 위치 서비스가 활성화되었는지 확인하는 변수
-    PermissionStatus permissionGranted; // 위치 권한을 확인하는 변수
+    Location location = Location();
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -70,53 +67,55 @@ class MapState extends State<Map> with ChangeNotifier {
       }
     }
 
-    location.onLocationChanged.throttle((_) => TimerStream(true, const Duration(seconds: 0)))
-        .listen((LocationData locationData) { // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
+    location.changeSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5,
+    );
+
+    location.onLocationChanged
+        .throttle((_) => TimerStream(true, const Duration(seconds: 1)))
+        .listen((LocationData locationData) {
+        // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
       setState(() {
         currentLocation = locationData;
-
         if (isTracking) {
           if (isRunning) {
-            if (latmin > locationData.latitude!) {
+            if (latmin > locationData.latitude!)
               latmin = locationData.latitude!;
-            }
-            if (lonmin > locationData.longitude!) {
+            if (lonmin > locationData.longitude!)
               lonmin = locationData.longitude!;
-            }
-            if (latmax < locationData.latitude!) {
+            if (latmax < locationData.latitude!)
               latmax = locationData.latitude!;
-            }
-            if (lonmax < locationData.longitude!) {
+            if (lonmax < locationData.longitude!)
               lonmax = locationData.longitude!;
-            }
 
             gpx.wpts.add(
-                Wpt(
-                  lat: locationData.latitude!,
-                  lon: locationData.longitude!,
-                  ele: locationData.altitude!,
-                  time: DateTime.now(),
-                )
+              Wpt(
+                lat: locationData.latitude!,
+                lon: locationData.longitude!,
+                ele: locationData.altitude!,
+                time: DateTime.now(),
+              )
             );
-            LatLng currentLatLng = LatLng(
-                locationData.latitude!, locationData.longitude!);
+
+            LatLng currentLatLng =
+              LatLng(locationData.latitude!, locationData.longitude!);
             if (routeCoordinates.isNotEmpty) {
-              totalDistance +=
-                  calculateDistance(routeCoordinates.last, currentLatLng);
+              totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
             }
             routeCoordinates.add(currentLatLng);
           }
         }
       });
       mapController.animateCamera(
-        CameraUpdate.newLatLng(LatLng(locationData.latitude!-0.001, locationData.longitude!)),
+        CameraUpdate.newLatLng(
+          LatLng(locationData.latitude!, locationData.longitude!)),
       );
-    }
-    );
+    });
   }
 
   double calculateDistance(LatLng latLng1, LatLng latLng2) {
-    double distanceInMeters = Geolocator.distanceBetween(
+    double distanceInMeters = geo.Geolocator.distanceBetween(
       latLng1.latitude,
       latLng1.longitude,
       latLng2.latitude,
@@ -173,7 +172,6 @@ class MapState extends State<Map> with ChangeNotifier {
       isTracking = false;
       totalDistance = calculateTotalDistance();
     });
-
     ResultArguments args = ResultArguments(gpx, milliseconds, totalDistance);
     if (totalDistance != 0 && milliseconds != 0) {
       Navigator.push(
@@ -190,7 +188,6 @@ class MapState extends State<Map> with ChangeNotifier {
         timeInSecForIosWeb: 3,
       );
     }
-
   }
 
   Future<bool> onWillPop() async {
@@ -198,7 +195,7 @@ class MapState extends State<Map> with ChangeNotifier {
     if (currentBackPressTime == null ||
         now.difference(currentBackPressTime!) > const Duration(seconds: 2)) {
       currentBackPressTime = now;
-      const msg = "'뒤로'버튼을 한 번 더 누르면 종료됩니다.";
+      const msg = "Press back again to exit app.";
       Fluttertoast.showToast(msg: msg);
       return Future.value(false);
     }
@@ -207,60 +204,61 @@ class MapState extends State<Map> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Record",
-            style: SafeGoogleFont(
-              'MuseoModerno',
-              fontSize: 21,
-              color: Colors.black,
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0.0,
-          leading: TextButton(
-            onPressed: () {
-              debugPrint("back button clicked");
-            },
-            child: Text("back",
+    double panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
+    double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
+    double fabHeightClose = panelHeightClose + 30;
+    return WillPopScope(
+      onWillPop: onWillPop,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text("Record",
               style: SafeGoogleFont(
-                'NanumGothic',
-                fontSize: 15,
+                'MuseoModerno',
+                fontSize: 21,
+                color: Colors.black,
               ),
             ),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0.0,
+            leading: TextButton(
+              onPressed: () {
+                debugPrint("back button clicked");
+              },
+              child: Text("back",
+                style: SafeGoogleFont(
+                  'NanumGothic',
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  print(routeCoordinates);
+                  debugPrint("settings button clicked");
+                },
+                icon: Icon(Icons.settings,
+                  color: Colors.blue[500],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                      builder: (context) => const MyPage()
+                      ));
+                },
+                icon: Icon(Icons.home,
+                  color: Colors.blue[500],
+                ),
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                print(routeCoordinates);
-                debugPrint("settings button clicked");
-              },
-              icon: Icon(Icons.settings,
-                color: Colors.blue[500],
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => const MyPage()
-                    ));
-              },
-              icon: Icon(Icons.home,
-                color: Colors.blue[500],
-              ),
-            ),
-          ],
-        ),
-        body: WillPopScope(
-          onWillPop: () {
-            return onWillPop();
-          },
-          child: Stack(
+          body: Stack(
             children: [
               GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
@@ -285,20 +283,39 @@ class MapState extends State<Map> with ChangeNotifier {
                   Marker(
                     markerId: const MarkerId('currentLocation'),
                     position: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-                    infoWindow: const InfoWindow(title: 'My Location'),
                   ),
                 },
               ),
+              Positioned(
+                right: 20,
+                bottom: fabHeight,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.white,
+                  onPressed: () {
+                    mapController.animateCamera(
+                      CameraUpdate.newLatLng(LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
+                    );
+                  },
+                  child: Icon(
+                    Icons.gps_fixed,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
               SlidingUpPanel(
-                minHeight: 70,
-                maxHeight: 225,
+                minHeight: panelHeightClose,
+                maxHeight: panelHeightOpen,
+                onPanelSlide: (position) => setState(() {
+                  final panelMaxScrollExtent = panelHeightOpen - panelHeightClose;
+                  fabHeight = position * panelMaxScrollExtent + fabHeightClose;
+                }),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
                 boxShadow: const [
                   BoxShadow(
-                      blurRadius: 0
+                    blurRadius: 0
                   ),
                 ],
                 header: Padding(
