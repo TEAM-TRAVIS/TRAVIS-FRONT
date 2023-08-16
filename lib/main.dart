@@ -27,7 +27,7 @@ class Travis extends StatelessWidget {
 		return MultiProvider(
 			providers: [
 				ChangeNotifierProvider(create: (context) => UserProvider()),
-				ChangeNotifierProvider(create: (context) => DateProvider()),
+				ChangeNotifierProvider(create: (context) => HistoryProvider()),
 			],
 		  child: MaterialApp(
 		    	title: 'Travis',

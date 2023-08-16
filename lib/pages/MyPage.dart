@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:Travis/pages/History.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/User.dart';
-import 'package:Travis/pages/NoHistroy.dart';
+// import 'package:Travis/pages/NoHistroy.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,13 +17,27 @@ class MyPage extends StatefulWidget {
   State<MyPage> createState() => _MyPageState();
 }
 
-class DateProvider extends ChangeNotifier {
+class HistoryProvider extends ChangeNotifier {
   String? _date;
+  double? _dist;
+  int? _time;
 
   String? get date => _date;
+  double? get dist => _dist;
+  int? get time => _time;
 
   void setDate(String date) {
     _date = date;
+    notifyListeners();
+  }
+
+  void setDist(double dist) {
+    _dist = dist;
+    notifyListeners();
+  }
+
+  void setTime(int time) {
+    _time = time;
     notifyListeners();
   }
 }
@@ -57,19 +71,13 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
           'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
         }),
       ); //post
-
-      print("마이페이지 post");
-      print(response.statusCode);
-      print("------------------");
-
+      print("MyPage Status Code: ${response.statusCode}");
       if (response.statusCode == 200) {
-        print("MyPage에 들어왔습니다.");
         try {
           var data = jsonDecode(response.body);
           setState(() {
             toDist = data['to_dist'].toDouble();
             toTime = data['to_time'];
-            print("제대로 들어왔다");
             userData = data['userData'];
           });
         } catch (e) {
@@ -173,6 +181,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
             : IconButton(
                 onPressed: () {
                   debugPrint("Menubutton clicked");
+                  print(Provider.of<HistoryProvider>(context, listen: false).time!);
                 },
                 icon: const Icon(
                   Icons.menu,
@@ -317,8 +326,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                     itemCount: userData.length,
                     itemBuilder: (context, index) {
                       String date = userData[index]['date'];
-                      var dist = userData[index]['dist'];
-                      var time = userData[index]['time'];
+                      double dist = userData[index]['dist'];
+                      int time = userData[index]['time'];
                       return GestureDetector(
                         onTap: () {
                           if (isMultiSelectionEnabled) {
@@ -332,16 +341,18 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                   builder: (context) => const History(),
                                 ),
                               );
-                              Provider.of<DateProvider>(context, listen: false)
-                                  .setDate(date);
-                            } else if (dist == 0 || time == 0) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const NoHistory(),
-                                ),
-                              );
+                              Provider.of<HistoryProvider>(context, listen: false).setDate(date);
+                              Provider.of<HistoryProvider>(context, listen: false).setDist(dist);
+                              Provider.of<HistoryProvider>(context, listen: false).setTime(time);
                             }
+                            // else if (dist == 0 || time == 0) {
+                            //   Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (context) => const NoHistory(),
+                            //     ),
+                            //   );
+                            // }
                           }
                         },
                         onLongPress: () {

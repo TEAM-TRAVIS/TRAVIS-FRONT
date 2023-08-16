@@ -24,26 +24,25 @@ class _HistoryState extends State<History> with ChangeNotifier {
   late GoogleMapController mapController;
   late String? gpxData;
   List<LatLng> route = [];
+  final String getGPSUrl = "http://44.218.14.132/gps/detail";
 
   @override
   void initState() {
-    save(context);
+    getGPS(context);
     super.initState();
     route = [];
   }
 
-  final String url = "http://44.218.14.132/gps/detail";
-
-  Future save(BuildContext contexts) async {
+  Future getGPS(BuildContext context) async {
     try {
       var response = await http.post(
-        Uri.parse(url),
+        Uri.parse(getGPSUrl),
         headers: <String, String>{
           'Content-Type': 'application/json;charSet=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
-          'date': Provider.of<DateProvider>(context, listen: false).date!,
+          'date': Provider.of<HistoryProvider>(context, listen: false).date!,
         }),
       ); //post
 
@@ -150,14 +149,9 @@ class _HistoryState extends State<History> with ChangeNotifier {
             TextButton(
               onPressed: () {
                 print("share button clicked");
-                // print(gpxData);
-                // print(route[0]);
-                // print(gpxData);
-                print(latmin);
-                print(latmax);
-                print(lonmin);
-                print(lonmax);
-                print(route);
+                print(Provider.of<HistoryProvider>(context, listen: false).time);
+                print(Provider.of<HistoryProvider>(context, listen: false).date);
+                print(Provider.of<HistoryProvider>(context, listen: false).dist);
               },
               child: Text(
                 "Share",
@@ -254,8 +248,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "hihi",
-                                    // time,
+                                    // "hihi",
+                                    formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
@@ -290,8 +284,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "hello",
-                                    // '${(totalDistance/1000).toStringAsFixed(1)}km',
+                                    // "hello",
+                                    "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
