@@ -34,21 +34,22 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   double toDist = 0.0;
   int toTime = 0;
   List<dynamic> userData = [];
-  final String url = "http://44.218.14.132/gps/summary";
+  final String getAllSummaryUrl = "http://44.218.14.132/gps/summary/all";
+  final String deleteOneSummaryUrl = "http://44.218.14.132/gps/summary";
 
   @override
   void initState() {
     super.initState();
     try {
-      save(context);
+      getAllSummary(context);
     } catch (e) {
       debugPrint("컨텍스트 없는듯");
     }
   }
 
-  Future save(BuildContext contexts) async {
+  Future getAllSummary(BuildContext contexts) async {
     try {
-      var response = await http.post(Uri.parse(url),
+      var response = await http.post(Uri.parse(getAllSummaryUrl),
         headers: <String, String>{
           'Content-Type': 'application/json;charSet=UTF-8',
         },
@@ -83,7 +84,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   Future deleteOneSummary(BuildContext context, String paramDate) async {
     try {
       var response = await http.delete(
-        Uri.parse(url),
+        Uri.parse(deleteOneSummaryUrl),
         headers: <String, String>{
           'Content-Type': 'application/json;charSet=UTF-8',
         },
@@ -94,6 +95,10 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
       ); //post
       print(response.statusCode);
       print(response.body);
+      if (response.statusCode == 200) {
+        getAllSummary(context);
+        selectedIndexes.clear();
+      }
     } catch (e) {
       debugPrint('오류 발생: $e');
     }
@@ -180,9 +185,11 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                 onPressed: () {
                   print("delete button clicked");
                   for (var index in selectedIndexes) {
-                    deleteOneSummary(context, index);
+                    String formattedOutput = index.replaceFirst('Z', '+00:00');
+                    setState(() {
+                      deleteOneSummary(context, formattedOutput);
+                    });
                   }
-                  setState(() {});
                 },
                 icon: const Icon(
                   Icons.delete,
@@ -191,8 +198,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
               )
             : IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => const Map()));
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                      builder: (BuildContext context) => Map()), (route) => false);
                 },
                 icon: const Icon(
                   Icons.home,
