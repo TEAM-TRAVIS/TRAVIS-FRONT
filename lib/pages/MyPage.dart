@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'package:Travis/pages/History.dart';
 import 'package:Travis/pages/Map.dart';
@@ -28,9 +29,12 @@ class DateProvider extends ChangeNotifier {
 }
 
 class _MyPageState extends State<MyPage> with ChangeNotifier {
+  HashSet<String> selectedIndexes = HashSet();
+  bool isMultiSelectionEnabled = false;
   double toDist = 0.0;
   int toTime = 0;
   List<dynamic> userData = [];
+  final String url = "http://44.218.14.132/gps/summary";
 
   @override
   void initState() {
@@ -42,7 +46,6 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     }
   }
 
-  final String url = "http://44.218.14.132/gps/summary";
   Future save(BuildContext contexts) async {
     try {
       var response = await http.post(Uri.parse(url),
@@ -56,15 +59,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
 
       print("마이페이지 post");
       print(response.statusCode);
-      // print(response.body);
       print("------------------");
-      // var data = jsonDecode(response.body);
-      // print(data);
-      // print(data.runtimeType);
-      // toDist = data['to_dist'];
-      // toTime = data['to_time'];
-      // print(toDist);
-      // print(toTime);
 
       if (response.statusCode == 200) {
         print("MyPage에 들어왔습니다.");
@@ -73,15 +68,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
           setState(() {
             toDist = data['to_dist'].toDouble();
             toTime = data['to_time'];
-            print(toDist);
             print("제대로 들어왔다");
-
             userData = data['userData'];
-            // print(userData);
-            // print(userData.length);
-            // print(userData[1]);
-            // print(userData[1]['date']);
-
           });
         } catch (e) {
           print(e);
@@ -90,7 +78,25 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     } catch (e) {
       debugPrint('오류 발생: $e');
     }
-    // response를 건별로 분리해 새로운 변수에 담고 그것을 리스트뷰에 각각 담는다.
+  }
+
+  Future deleteOneSummary(BuildContext context, String paramDate) async {
+    try {
+      var response = await http.delete(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json;charSet=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
+          'date': paramDate,
+        }),
+      ); //post
+      print(response.statusCode);
+      print(response.body);
+    } catch (e) {
+      debugPrint('오류 발생: $e');
+    }
   }
 
   String formatTime(seconds) {
@@ -108,13 +114,33 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}";
   }
 
+  void doMultiSelection(String string) {
+    if (isMultiSelectionEnabled) {
+      if (selectedIndexes.contains(string)) {
+        selectedIndexes.remove(string);
+      } else {
+        selectedIndexes.add(string);
+      }
+      setState(() {});
+    }
+  }
+
+  String getSelectedIndexesCount() {
+    return selectedIndexes.isNotEmpty
+        ? selectedIndexes.length.toString() + " item selected"
+        : "No item selected";
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Travis",
+          title: Text(
+            isMultiSelectionEnabled
+            ? getSelectedIndexesCount() :
+            "Travis",
             style: SafeGoogleFont(
               'MuseoModerno',
               fontSize: 25,
@@ -123,28 +149,56 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
             ),
           ),
           centerTitle: true,
-          backgroundColor: const Color.fromARGB(255, 41, 91, 242),
+          backgroundColor:
+            isMultiSelectionEnabled
+            ? const Color.fromARGB(255, 224, 20, 20)
+            : const Color.fromARGB(255, 41, 91, 242),
           elevation: 0.0,
-          leading: IconButton(
-            onPressed: () {
-              debugPrint("Menubutton clicked");
-            },
-            icon: const Icon(
-              Icons.menu,
-              color: Color.fromARGB(255, 236, 246, 255),
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => const Map()));
-              },
-              icon: const Icon(
-                Icons.home,
-                color: Color.fromARGB(255, 236, 246, 255),
+          leading:
+            isMultiSelectionEnabled
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    selectedIndexes.clear();
+                    isMultiSelectionEnabled = false;
+                  });
+                },
+                icon: Icon(Icons.close)
+              )
+            : IconButton(
+                onPressed: () {
+                  debugPrint("Menubutton clicked");
+                },
+                icon: const Icon(
+                  Icons.menu,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
               ),
-            ),
+          actions: [
+            isMultiSelectionEnabled
+            ? IconButton(
+                onPressed: () {
+                  print("delete button clicked");
+                  for (var index in selectedIndexes) {
+                    deleteOneSummary(context, index);
+                  }
+                  setState(() {});
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
+              )
+            : IconButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => const Map()));
+                },
+                icon: const Icon(
+                  Icons.home,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
+              )
           ],
         ),
         body: Center(
@@ -158,8 +212,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                     Expanded(
                       child: Center(
                         child: Text(
-                          "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]},",
-                          // DB에서 유저 이름 가져와야함.
+                          "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]}",
                           style: SafeGoogleFont(
                             'MuseoModerno',
                             fontSize: 27,
@@ -232,7 +285,6 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                     alignment: Alignment.centerRight,
                                     child: Text(
                                       formatTime(toTime),
-                                      // "00:00:00",
                                       style: SafeGoogleFont(
                                         'MuseoModerno',
                                         fontSize: 25,
@@ -262,67 +314,86 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                       var time = userData[index]['time'];
                       return GestureDetector(
                         onTap: () {
-                          if (dist != 0 && time != 0) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const History(),
-                              ),
-                            );
-                            Provider.of<DateProvider>(context, listen: false)
-                              .setDate(date);
+                          if (isMultiSelectionEnabled) {
+                            doMultiSelection(date);
+                            print("selectedindexes: $selectedIndexes");
                           } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NoHistory(),
-                              ),
-                            );
+                            if (dist != 0 && time != 0) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const History(),
+                                ),
+                              );
+                              Provider.of<DateProvider>(context, listen: false)
+                                  .setDate(date);
+                            } else if (dist == 0 || time == 0) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NoHistory(),
+                                ),
+                              );
+                            }
                           }
                         },
+                        onLongPress: () {
+                          print("clicked");
+                          isMultiSelectionEnabled = true;
+                          doMultiSelection(date);
+                          print("selectedindexes: $selectedIndexes");
+                        },
                         child: Card(
-                          child: Row(
+                          child: Stack(
+                            alignment: Alignment.centerRight,
                             children: [
-                              const SizedBox(
-                                width: 100,
-                                height: 100,
-                                // child: Image.asset(imageList[index]),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 200,
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "${dateChange(date)} ${timeChange(date)}",
+                                          style: SafeGoogleFont(
+                                            'MuseoModerno',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${dist}km",
+                                          style: SafeGoogleFont(
+                                            'MuseoModerno',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          formatTime(time),
+                                          style: SafeGoogleFont(
+                                            'MuseoModerno',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(left: 15),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "${dateChange(date)} ${timeChange(date)}",
-                                      // userData['date'],
-                                      // "Aug/06/2023 15:37:30",
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      "${dist}km",
-                                      // userData['date'],
-                                      // "Aug/06/2023 15:37:30",
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      formatTime(time),
-                                      // userData['date'],
-                                      // "Aug/06/2023 15:37:30",
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Visibility(
+                                  visible: isMultiSelectionEnabled,
+                                  child: Icon(
+                                    selectedIndexes.contains(date)
+                                        ? Icons.check_circle
+                                        : Icons.radio_button_unchecked,
+                                    size: 30,
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ),
                             ],
