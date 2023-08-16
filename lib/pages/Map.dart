@@ -34,7 +34,8 @@ class MapState extends State<Map> with ChangeNotifier {
   double totalDistance = 0.0;
   bool isTracking = false;
   bool isRunning = false;
-  static double fabHeight = 300;
+  static const double fabHeightClose = 100;
+  double fabHeight = fabHeightClose;
   LocationData? currentLocation = LocationData.fromMap({
     "latitude": 37.7749,
     "longitude": -122.4194,
@@ -206,7 +207,7 @@ class MapState extends State<Map> with ChangeNotifier {
   Widget build(BuildContext context) {
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
-    double fabHeightClose = panelHeightClose + 30;
+    // fabHeightClose = panelHeightClose + 30;
     return WillPopScope(
       onWillPop: onWillPop,
       child: MaterialApp(
@@ -237,7 +238,7 @@ class MapState extends State<Map> with ChangeNotifier {
             actions: [
               IconButton(
                 onPressed: () {
-                  print(routeCoordinates);
+                  print(panelHeightClose);
                   debugPrint("settings button clicked");
                 },
                 icon: Icon(Icons.settings,
