@@ -22,9 +22,10 @@ class _SignupState extends State<Signup> {
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-
   final String url = "http://44.218.14.132/user/signup";
-  Future save() async {
+  User user = User('', '', '');
+
+  Future Signup() async {
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -36,10 +37,8 @@ class _SignupState extends State<Signup> {
             'password': user.password,
           })
       ); //post
-
       print(response.statusCode);
       print(response.body);
-
       if (response.statusCode == 201) {
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Login()));
@@ -75,13 +74,12 @@ class _SignupState extends State<Signup> {
     _emailFocusNode.unfocus();
     _passwordFocusNode.unfocus();
   }
-  User user = User('', '', '');
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _hideKeyboard,
       child: Scaffold(
-        // resizeToAvoidBottomInset: true,
         body: SingleChildScrollView(
           child: Center(
             child: Form(
@@ -258,7 +256,7 @@ class _SignupState extends State<Signup> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           debugPrint("ok");
-                          save();
+                          Signup();
                         } else {
                           debugPrint("not ok");
                         }
@@ -285,8 +283,11 @@ class _SignupState extends State<Signup> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (context) => const SignupComplete()));
+                          Navigator.pushAndRemoveUntil(context,
+                            MaterialPageRoute(
+                            builder:
+                              (BuildContext context) => SignupComplete()),
+                              (route) => false);
                         },
                         child: Text("Terms of Use",
                           style: TextStyle(

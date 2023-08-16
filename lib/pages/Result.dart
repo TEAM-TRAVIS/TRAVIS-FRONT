@@ -22,9 +22,9 @@ class Result extends StatefulWidget {
 
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
-
-  final String url = "http://44.218.14.132/gps/save";
-  Future save(Gpx gpxData) async {
+  final String saveGPSUrl = "http://44.218.14.132/gps/save";
+  
+  Future saveGPS(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     debugPrint("GpxString 출력결과: $gpxString");
     debugPrint("-------------");
@@ -43,7 +43,7 @@ class _ResultState extends State<Result> {
     print("거리: $distValue");
 
     try {
-      var response = await http.post(Uri.parse(url),
+      var response = await http.post(Uri.parse(saveGPSUrl),
           headers: <String, String>{
             'Content-Type': 'application/json',
           },
@@ -75,7 +75,6 @@ class _ResultState extends State<Result> {
   //   debugPrint('Current Zoom Level: $zoomLevel');
   // }
 
-  // Map map = const Map();
   @override
   Widget build(BuildContext context) {
     final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
@@ -114,7 +113,7 @@ class _ResultState extends State<Result> {
           actions: [
             TextButton(
               onPressed: () {
-                save(gpxData);
+                saveGPS(gpxData);
               },
               child: Text("Save",
                 style: SafeGoogleFont(

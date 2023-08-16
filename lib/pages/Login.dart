@@ -22,7 +22,7 @@ class _LoginState extends State<Login> {
   final FocusNode _passwordFocusNode = FocusNode();
 
   final String url = "http://44.218.14.132/user/login";
-  Future save() async {
+  Future Login() async {
     try {
       var res = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -187,7 +187,7 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.fromLTRB(265, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
-                      save();
+                      Login();
                       Provider.of<UserProvider>(context, listen: false).setUserInfo(user.email);
                     },
                     style: ElevatedButton.styleFrom(
