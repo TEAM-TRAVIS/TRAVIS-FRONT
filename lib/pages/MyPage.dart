@@ -61,6 +61,10 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     }
   }
 
+  void dispose() {
+    super.dispose();
+  }
+
   Future getAllSummary(BuildContext contexts) async {
     try {
       var response = await http.post(Uri.parse(getAllSummaryUrl),
@@ -207,14 +211,22 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
               )
             : IconButton(
                 onPressed: () {
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-                      builder: (BuildContext context) => Map()), (route) => false);
+                  Navigator.pop(context);
                 },
                 icon: const Icon(
                   Icons.home,
                   color: Color.fromARGB(255, 236, 246, 255),
                 ),
-              )
+              ),
+              IconButton(
+                onPressed: () {
+                  getAllSummary(context);
+                },
+                icon: const Icon(
+                  Icons.refresh,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
+              ),
           ],
         ),
         body: Center(
@@ -324,9 +336,9 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                   padding: const EdgeInsets.all(20),
                   child: ListView.builder(
                     itemCount: userData.length,
-                    itemBuilder: (context, index) {
+                    itemBuilder: (ctx, index) {
                       String date = userData[index]['date'];
-                      double dist = userData[index]['dist'];
+                      double dist = userData[index]['dist'].toDouble();
                       int time = userData[index]['time'];
                       return GestureDetector(
                         onTap: () {
@@ -334,25 +346,15 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                             doMultiSelection(date);
                             print("selectedindexes: $selectedIndexes");
                           } else {
-                            if (dist != 0 && time != 0) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const History(),
-                                ),
-                              );
-                              Provider.of<HistoryProvider>(context, listen: false).setDate(date);
-                              Provider.of<HistoryProvider>(context, listen: false).setDist(dist);
-                              Provider.of<HistoryProvider>(context, listen: false).setTime(time);
-                            }
-                            // else if (dist == 0 || time == 0) {
-                            //   Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //       builder: (context) => const NoHistory(),
-                            //     ),
-                            //   );
-                            // }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const History(),
+                              ),
+                            );
+                            Provider.of<HistoryProvider>(context, listen: false).setDate(date);
+                            Provider.of<HistoryProvider>(context, listen: false).setDist(dist);
+                            Provider.of<HistoryProvider>(context, listen: false).setTime(time);
                           }
                         },
                         onLongPress: () {

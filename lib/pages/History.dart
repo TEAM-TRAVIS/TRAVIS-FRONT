@@ -33,6 +33,12 @@ class _HistoryState extends State<History> with ChangeNotifier {
     route = [];
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    mapController.dispose();
+  }
+
   Future getGPS(BuildContext context) async {
     try {
       var response = await http.post(
@@ -118,207 +124,210 @@ class _HistoryState extends State<History> with ChangeNotifier {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "History",
-            style: SafeGoogleFont(
-              'MuseoModerno',
-              fontSize: 21,
-              color: Colors.black,
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0.0,
-          leading: TextButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const MyPage()));
-            },
-            child: Text(
-              "Back",
+      home: WillPopScope(
+        onWillPop: () async {
+          Navigator.pop(context);
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "History",
               style: SafeGoogleFont(
-                'NanumGothic',
-                fontSize: 15,
-                color: Colors.red,
+                'MuseoModerno',
+                fontSize: 21,
+                color: Colors.black,
               ),
             ),
-          ),
-          actions: [
-            TextButton(
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0.0,
+            leading: TextButton(
               onPressed: () {
-                print("share button clicked");
-                print(Provider.of<HistoryProvider>(context, listen: false).time);
-                print(Provider.of<HistoryProvider>(context, listen: false).date);
-                print(Provider.of<HistoryProvider>(context, listen: false).dist);
+                Navigator.pop(context);
               },
               child: Text(
-                "Share",
+                "Back",
                 style: SafeGoogleFont(
                   'NanumGothic',
                   fontSize: 15,
-                  color: Colors.blue,
+                  color: Colors.red,
                 ),
               ),
             ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                mapController = controller;
-              },
-              initialCameraPosition: CameraPosition(
-                target: LatLng(((latmax - latmin) / 2 + latmin),
-                    ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
-                zoom:
-                    -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
-              ),
-              polylines: <Polyline>{
-                for (int i = 0; i < route.length - 1; i++)
-                  Polyline(
-                    polylineId: PolylineId("route_$i"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  print("share button clicked");
+                  print(Provider.of<HistoryProvider>(context, listen: false).time);
+                  print(Provider.of<HistoryProvider>(context, listen: false).date);
+                  print(Provider.of<HistoryProvider>(context, listen: false).dist);
+                },
+                child: Text(
+                  "Share",
+                  style: SafeGoogleFont(
+                    'NanumGothic',
+                    fontSize: 15,
                     color: Colors.blue,
-                    width: 5,
-                    points: [route[i], route[i + 1]],
                   ),
-              },
-              zoomControlsEnabled: false,
-            ),
-            SlidingUpPanel(
-              minHeight: 70,
-              maxHeight: 225,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                ),
               ),
-              boxShadow: const [
-                BoxShadow(blurRadius: 0),
-              ],
-              header: Padding(
-                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
-                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 0,
+            ],
+          ),
+          body: Stack(
+            children: [
+              GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  mapController = controller;
+                },
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(((latmax - latmin) / 2 + latmin),
+                      ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
+                  zoom:
+                      -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+                ),
+                polylines: <Polyline>{
+                  for (int i = 0; i < route.length - 1; i++)
+                    Polyline(
+                      polylineId: PolylineId("route_$i"),
+                      color: Colors.blue,
+                      width: 5,
+                      points: [route[i], route[i + 1]],
+                    ),
+                },
+                zoomControlsEnabled: false,
+              ),
+              SlidingUpPanel(
+                minHeight: 70,
+                maxHeight: 225,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 0),
+                ],
+                header: Padding(
+                  padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: 100,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
+                      borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                panel: Container(
+                  margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Travel path",
+                          style: SafeGoogleFont(
+                            'MuseoModerno',
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Divider(
+                        color: Color.fromARGB(255, 217, 217, 217),
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
+                                      style: SafeGoogleFont(
+                                        'MuseoModerno',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
+                                    ),
+                                    Text(
+                                      "Time",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(
+                                            255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 30,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      // "hello",
+                                      "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
+                                      style: SafeGoogleFont(
+                                        'MuseoModerno',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
+                                    ),
+                                    Text(
+                                      "Distance",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              panel: Container(
-                margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Travel path",
-                        style: SafeGoogleFont(
-                          'MuseoModerno',
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Divider(
-                      color: Color.fromARGB(255, 217, 217, 217),
-                      height: 1,
-                      thickness: 1,
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    // "hihi",
-                                    formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Time",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(
-                                          255, 163, 163, 163),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    // "hello",
-                                    "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Distance",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(
-                                          255, 163, 163, 163),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
