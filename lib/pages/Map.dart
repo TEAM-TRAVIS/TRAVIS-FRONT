@@ -207,7 +207,6 @@ class MapState extends State<Map> with ChangeNotifier {
   Widget build(BuildContext context) {
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
-    // fabHeightClose = panelHeightClose + 30;
     return WillPopScope(
       onWillPop: onWillPop,
       child: MaterialApp(
@@ -224,24 +223,23 @@ class MapState extends State<Map> with ChangeNotifier {
             centerTitle: true,
             backgroundColor: Colors.white,
             elevation: 0.0,
-            leading: TextButton(
+            leading: IconButton(
               onPressed: () {
-                debugPrint("back button clicked");
+                debugPrint("home menu button clicked");
               },
-              child: Text("back",
-                style: SafeGoogleFont(
-                  'NanumGothic',
-                  fontSize: 15,
+              icon: Icon(
+                Icons.menu,
+                color: Colors.blue,
                 ),
               ),
-            ),
             actions: [
               IconButton(
                 onPressed: () {
                   print(panelHeightClose);
                   debugPrint("settings button clicked");
                 },
-                icon: Icon(Icons.settings,
+                icon: Icon(
+                  Icons.settings,
                   color: Colors.blue[500],
                 ),
               ),
