@@ -36,10 +36,6 @@ class Travis extends StatelessWidget {
 		    	theme: ThemeData(
 		    		primarySwatch: Colors.blue,
 		    	),
-					routes: {
-						'Map' : (BuildContext context) => Map(),
-						'MyPage' : (BuildContext context) => MyPage(),
-					},
 		    	home: const Scaffold(
 		    		body: SingleChildScrollView(
 		    			child: CreateAccount(),
