@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:Travis/pages/Map.dart';
+import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -23,7 +24,7 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
   final String saveGPSUrl = "http://44.218.14.132/gps/save";
-  
+
   Future saveGPS(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     debugPrint("GpxString 출력결과: $gpxString");
@@ -32,7 +33,6 @@ class _ResultState extends State<Result> {
     final gpxBase64 = base64.encode(gpxGzip);
 
     XmlDocument document = XmlDocument.parse(gpxString);
-    print(document);
     XmlNode emailnode = document.findAllElements('name').first;
     String emailValue = emailnode.innerText;
     XmlNode distnode = document.findAllElements('keywords').first;
@@ -57,7 +57,8 @@ class _ResultState extends State<Result> {
       print(response.statusCode);
       debugPrint(response.body);
       if (response.statusCode == 201) {
-        Navigator.popAndPushNamed(context, 'MyPage');
+        Navigator.pushReplacement(context, MaterialPageRoute(
+          builder: (context) => MyPage()));
     } else {
         Fluttertoast.showToast(
           msg: "Temporary network error occured!",
@@ -87,7 +88,8 @@ class _ResultState extends State<Result> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Result",
+          title: Text(
+            "Result",
             style: SafeGoogleFont(
               'MuseoModerno',
               fontSize: 21,
@@ -102,7 +104,8 @@ class _ResultState extends State<Result> {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) => const Map()));
             },
-            child: Text("Cancel",
+            child: Text(
+              "Cancel",
               style: SafeGoogleFont(
                 'NanumGothic',
                 fontSize: 12,
@@ -115,7 +118,8 @@ class _ResultState extends State<Result> {
               onPressed: () {
                 saveGPS(gpxData);
               },
-              child: Text("Save",
+              child: Text(
+                "Save",
                 style: SafeGoogleFont(
                   'NanumGothic',
                   fontSize: 15,
@@ -131,7 +135,6 @@ class _ResultState extends State<Result> {
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
               },
-              //
               initialCameraPosition: CameraPosition(
                 target: LatLng(((latmax - latmin) / 2 + latmin),
                     ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
@@ -183,7 +186,8 @@ class _ResultState extends State<Result> {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Travel path",
+                      child: Text(
+                        "Travel path",
                         style: SafeGoogleFont(
                           'MuseoModerno',
                           fontSize: 25,
@@ -222,7 +226,8 @@ class _ResultState extends State<Result> {
                                     height: 1,
                                     thickness: 1,
                                   ),
-                                  Text("Time",
+                                  Text(
+                                    "Time",
                                     style: SafeGoogleFont(
                                       'NanumGothic',
                                       fontSize: 10,
@@ -243,8 +248,7 @@ class _ResultState extends State<Result> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    // "hello",
-                                    '${(totalDistance/1000).toStringAsFixed(1)}km',
+                                    "${(totalDistance/1000).toStringAsFixed(1)}km",
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
@@ -256,7 +260,8 @@ class _ResultState extends State<Result> {
                                     height: 1,
                                     thickness: 1,
                                   ),
-                                  Text("Distance",
+                                  Text(
+                                    "Distance",
                                     style: SafeGoogleFont(
                                       'NanumGothic',
                                       fontSize: 10,
