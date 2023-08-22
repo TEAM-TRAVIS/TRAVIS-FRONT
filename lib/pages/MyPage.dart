@@ -1,9 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:Travis/pages/History.dart';
-import 'package:Travis/pages/Map.dart';
 import 'package:Travis/User.dart';
-// import 'package:Travis/pages/NoHistroy.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -83,6 +81,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
             toDist = data['to_dist'].toDouble();
             toTime = data['to_time'];
             userData = data['userData'];
+
           });
         } catch (e) {
           print(e);
@@ -358,7 +357,6 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                           }
                         },
                         onLongPress: () {
-                          print("clicked");
                           isMultiSelectionEnabled = true;
                           doMultiSelection(date);
                           print("selectedindexes: $selectedIndexes");
