@@ -24,6 +24,8 @@ class Result extends StatefulWidget {
 class _ResultState extends State<Result> {
   late GoogleMapController mapController;
   final String saveGPSUrl = "http://44.218.14.132/gps/save";
+  String? titleValue = "";
+  String? contentValue = "";
 
   Future saveGPS(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
@@ -32,15 +34,17 @@ class _ResultState extends State<Result> {
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
 
+    /// gpxString을 xml 형식으로 parse
     XmlDocument document = XmlDocument.parse(gpxString);
+    /// document에서 user의 email 분리
     XmlNode emailnode = document.findAllElements('name').first;
     String emailValue = emailnode.innerText;
+    /// document에서 현재 경로의 distance 분리
     XmlNode distnode = document.findAllElements('keywords').first;
     String distValue = distnode.innerText;
+    /// document에서 현재 경로의 time 분리
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
-    print("타임: $timeValue");
-    print("거리: $distValue");
 
     try {
       var response = await http.post(Uri.parse(saveGPSUrl),
@@ -51,11 +55,13 @@ class _ResultState extends State<Result> {
             'email': emailValue,
             'dist' : distValue,
             'time' : timeValue,
+            'title' : titleValue!,
+            'content' : contentValue!,
             'file' : gpxBase64,
           }),
       ); //post
       print(response.statusCode);
-      debugPrint(response.body);
+      print(response.body);
       if (response.statusCode == 201) {
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (context) => MyPage()));
@@ -84,6 +90,8 @@ class _ResultState extends State<Result> {
     final totalDistance = args.totalDistance;
     Duration duration = Duration(milliseconds: milliseconds);
     String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+    double panelHeightOpen = MediaQuery.of(context).size.height * 0.5;
+    double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -152,8 +160,8 @@ class _ResultState extends State<Result> {
               zoomControlsEnabled: false,
             ),
             SlidingUpPanel(
-              minHeight: 70,
-              maxHeight: 225,
+              minHeight: panelHeightClose,
+              maxHeight: panelHeightOpen,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(30),
                 topRight: Radius.circular(30),
@@ -204,76 +212,124 @@ class _ResultState extends State<Result> {
                       height: 1,
                       thickness: 1,
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  time,
+                                  style: SafeGoogleFont(
+                                    'MuseoModerno',
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Divider(
+                                  color: Color.fromARGB(255, 217, 217, 217),
+                                  height: 1,
+                                  thickness: 1,
+                                ),
+                                Text(
+                                  "Time",
+                                  style: SafeGoogleFont(
+                                    'NanumGothic',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.normal,
+                                    color: const Color.fromARGB(255, 163, 163, 163),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 30,
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "${(totalDistance/1000).toStringAsFixed(1)}km",
+                                  style: SafeGoogleFont(
+                                    'MuseoModerno',
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const Divider(
+                                  color: Color.fromARGB(255, 217, 217, 217),
+                                  height: 1,
+                                  thickness: 1,
+                                ),
+                                Text(
+                                  "Distance",
+                                  style: SafeGoogleFont(
+                                    'NanumGothic',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.normal,
+                                    color: const Color.fromARGB(255, 163, 163, 163),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    time,
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Time",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(255, 163, 163, 163),
-                                    ),
-                                  ),
-                                ],
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Color.fromARGB(255, 217, 217, 217),
+                              width: 1,
+                            ),
+                        ),
+                        child: Column(
+                          children: [
+                            TextField(
+                              // controller: _emailController,
+                              // focusNode: _emailFocusNode,
+                              onChanged: (value) {
+                                titleValue = value;
+                              },
+                              decoration: InputDecoration(
+                                labelStyle: const TextStyle(
+                                  color: Colors.black26,
+                                ),
+                                hintText: 'Enter title of your journey',
+                                contentPadding: EdgeInsets.only(left: 5),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${(totalDistance/1000).toStringAsFixed(1)}km",
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Distance",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(255, 163, 163, 163),
-                                    ),
-                                  ),
-                                ],
+                            TextField(
+                              // controller: _emailController,
+                              // focusNode: _emailFocusNode,
+                              onChanged: (value) {
+                                contentValue = value;
+                              },
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelStyle: const TextStyle(
+                                  color: Colors.black26,
+                                ),
+                                hintText: 'Enter brief description',
+                                contentPadding: EdgeInsets.only(left: 5, top: 50, bottom: 0),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
