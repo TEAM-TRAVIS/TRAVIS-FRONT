@@ -5,6 +5,7 @@ import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -33,6 +34,7 @@ class _ResultState extends State<Result> {
     debugPrint("-------------");
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
+    findRegion(routeCoordinates);
 
     /// gpxString을 xml 형식으로 parse
     XmlDocument document = XmlDocument.parse(gpxString);
@@ -57,6 +59,7 @@ class _ResultState extends State<Result> {
             'time' : timeValue,
             'title' : titleValue!,
             'content' : contentValue!,
+            // 'city' : ,
             'file' : gpxBase64,
           }),
       ); //post
@@ -82,14 +85,35 @@ class _ResultState extends State<Result> {
   //   debugPrint('Current Zoom Level: $zoomLevel');
   // }
 
+  String formatTime(milliseconds) {
+    Duration duration = Duration(milliseconds: milliseconds);
+    return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+  }
+
+  Future<String> findRegion(routeCoordinates) async {
+    String locality = "";
+    List<String> region = [];
+    String result = "";
+    for (int i = 0; i < routeCoordinates.length; i += 600) {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(routeCoordinates[i].latitude!, routeCoordinates[i].longitude!);
+      locality = placemarks.first.locality ?? "Unknown location";
+      print(locality);
+      region.add(locality);
+      region = region.where((city) => city.length >= 5).toList();
+      result = region.join(", ");
+    }
+    region = region.where((city) => city.length >= 5).toList();
+    result = region.join(", ");
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
     final Gpx gpxData = args.gpx;
     final int milliseconds = args.milliseconds;
     final totalDistance = args.totalDistance;
-    Duration duration = Duration(milliseconds: milliseconds);
-    String time = DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.5;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
     return MaterialApp(
@@ -133,6 +157,15 @@ class _ResultState extends State<Result> {
                   fontSize: 15,
                   color: Colors.blue,
                 ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // print(routeCoordinates);
+                findRegion(routeCoordinates);
+              },
+              child: Text(
+                "test"
               ),
             ),
           ],
@@ -224,7 +257,7 @@ class _ResultState extends State<Result> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  time,
+                                  formatTime(milliseconds),
                                   style: SafeGoogleFont(
                                     'MuseoModerno',
                                     fontSize: 25,
