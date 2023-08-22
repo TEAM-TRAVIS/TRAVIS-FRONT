@@ -21,15 +21,23 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> with ChangeNotifier {
+  TextEditingController _titleEditingController = TextEditingController();
+  TextEditingController _contentEditingController = TextEditingController();
   late GoogleMapController mapController;
   late String? gpxData;
   List<LatLng> route = [];
   final String getGPSUrl = "http://44.218.14.132/gps/detail";
+  final String getOneSummaryUrl = "http://44.218.14.132/gps/summary";
+  final String updateSummaryUrl = "http://44.218.14.132/gps/summary/update";
+  String title = "";
+  String content = "";
+  bool isModifing = false;
 
   @override
   void initState() {
-    getGPS(context);
     super.initState();
+    getGPS(context);
+    getOneSummary(context);
     route = [];
   }
 
@@ -37,6 +45,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
   void dispose() {
     super.dispose();
     mapController.dispose();
+    _titleEditingController.dispose();
+    _contentEditingController.dispose();
   }
 
   Future getGPS(BuildContext context) async {
@@ -53,13 +63,11 @@ class _HistoryState extends State<History> with ChangeNotifier {
       ); //post
 
       print(response.statusCode);
-      // print(response.body);
+      print(response.body);
 
       if (response.statusCode == 201) {
         GZipCodec gzip = GZipCodec();
-        print("History 페이지에 들어왔습니다.");
         try {
-          print("제대로 들어왔습니다.");
           var data = jsonDecode(response.body);
           var encodedString = data['gzipFile'];
           List<int> zippedRoute = base64.decode(encodedString);
@@ -76,9 +84,57 @@ class _HistoryState extends State<History> with ChangeNotifier {
     }
   }
 
+  Future getOneSummary(BuildContext context) async {
+    try {
+      var response = await http.post(Uri.parse(getOneSummaryUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json;charSet=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
+          'date': Provider.of<HistoryProvider>(context, listen: false).date!.replaceFirst('Z', '+00:00'),
+        }),
+      ); //post
+      print("History Status Code: ${response.statusCode}");
+      print(response.body);
+      if (response.statusCode == 200) {
+        try {
+          var data = jsonDecode(response.body);
+          setState(() {
+            title = data['oneSummary']['title'];
+            content = data['oneSummary']['content'];
+          });
+        } catch (e) {
+          print(e);
+        }
+      }
+    } catch (e) {
+      debugPrint('오류 발생: $e');
+    }
+  }
+
+  Future updateSummary(BuildContext context) async {
+    try {
+      var response = await http.post(Uri.parse(updateSummaryUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json;charSet=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
+          'date': Provider.of<HistoryProvider>(context, listen: false).date!.replaceFirst('Z', '+00:00'),
+          'title' : title,
+          'content' : content,
+        }),
+      ); //post
+      print("update Status Code: ${response.statusCode}");
+      print(response.body);
+    } catch (e) {
+      debugPrint('오류 발생: $e');
+    }
+  }
+
   void parseGpx(gpxData) {
     try {
-      print("parseGpx 하겠습니다.");
       final document = XmlDocument.parse(gpxData);
       final wptElements = document.findAllElements('wpt');
 
@@ -111,13 +167,31 @@ class _HistoryState extends State<History> with ChangeNotifier {
         }
       });
     } catch (e) {
-      print("파싱이 안된것같습니다.");
+      print(e);
     }
   }
 
   String formatTime(seconds) {
     Duration duration = Duration(seconds: seconds);
     return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+  }
+
+  void _toggleEditing() {
+    setState(() {
+      isModifing = !isModifing;
+      if (isModifing) {
+        _titleEditingController.text = title;
+        _contentEditingController.text = content;
+      }
+    });
+  }
+
+  void _updateText() {
+    setState(() {
+      title = _titleEditingController.text;
+      content = _contentEditingController.text;
+      isModifing = false;
+    });
   }
 
   @override
@@ -159,9 +233,6 @@ class _HistoryState extends State<History> with ChangeNotifier {
               TextButton(
                 onPressed: () {
                   print("share button clicked");
-                  print(Provider.of<HistoryProvider>(context, listen: false).time);
-                  print(Provider.of<HistoryProvider>(context, listen: false).date);
-                  print(Provider.of<HistoryProvider>(context, listen: false).dist);
                 },
                 child: Text(
                   "Share",
@@ -198,8 +269,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
                 zoomControlsEnabled: false,
               ),
               SlidingUpPanel(
-                minHeight: 70,
-                maxHeight: 225,
+                minHeight: MediaQuery.of(context).size.height * 0.1,
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
@@ -228,17 +299,55 @@ class _HistoryState extends State<History> with ChangeNotifier {
                   margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
                   child: Column(
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Travel path",
-                          style: SafeGoogleFont(
-                            'MuseoModerno',
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                      Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Travel path",
+                              style: SafeGoogleFont(
+                                'MuseoModerno',
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
-                        ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: isModifing
+                              ? TextButton(
+                                  onPressed: () {
+                                    _updateText();
+                                    updateSummary(context);
+                                    setState(() {});
+                                  },
+                                  child: Text(
+                                    "Update",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(255, 239, 38, 38),
+                                    ),
+                                  ),
+                                )
+                              : TextButton(
+                                  onPressed: () {
+                                    _toggleEditing();
+                                    setState(() {});
+                                  },
+                                  child: Text(
+                                    "Modify",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                          ),
+                        ],
                       ),
                       const SizedBox(
                         height: 10,
@@ -248,79 +357,157 @@ class _HistoryState extends State<History> with ChangeNotifier {
                         height: 1,
                         thickness: 1,
                       ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text(
+                                    "Time",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(
+                                          255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    // "hello",
+                                    "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text(
+                                    "Distance",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                       Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const Divider(
-                                      color: Color.fromARGB(255, 217, 217, 217),
-                                      height: 1,
-                                      thickness: 1,
-                                    ),
-                                    Text(
-                                      "Time",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.normal,
-                                        color: const Color.fromARGB(
-                                            255, 163, 163, 163),
-                                      ),
-                                    ),
-                                  ],
+                        child: isModifing
+                          ? Container(
+                              margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color.fromARGB(255, 217, 217, 217),
+                                  width: 1,
                                 ),
                               ),
-                            ),
-                            const SizedBox(
-                              width: 30,
-                            ),
-                            Expanded(
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      // "hello",
-                                      "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w500,
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    controller: _titleEditingController,
+                                    // focusNode: _emailFocusNode,
+                                    onChanged: (value) {
+                                      title = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      labelStyle: const TextStyle(
+                                        color: Colors.black26,
                                       ),
+                                      hintText: 'Enter title of your journey',
+                                      contentPadding: EdgeInsets.only(left: 5),
                                     ),
-                                    const Divider(
-                                      color: Color.fromARGB(255, 217, 217, 217),
-                                      height: 1,
-                                      thickness: 1,
-                                    ),
-                                    Text(
-                                      "Distance",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.normal,
-                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                  ),
+                                  TextField(
+                                    controller: _contentEditingController,
+                                    // focusNode: _emailFocusNode,
+                                    onChanged: (value) {
+                                      content = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      labelStyle: const TextStyle(
+                                        color: Colors.black26,
                                       ),
+                                      hintText: 'Enter brief description',
+                                      contentPadding: EdgeInsets.only(left: 5, top: 50, bottom: 0),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
+                            )
+                          : Container(
+                              width: MediaQuery.of(context).size.width * 0.85,
+                              margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text(
+                                    content,
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
                       ),
                     ],
                   ),
