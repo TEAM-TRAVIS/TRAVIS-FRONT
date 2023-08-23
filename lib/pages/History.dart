@@ -32,6 +32,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
   String title = "";
   String content = "";
   bool isModifing = false;
+  bool isPublic = false;
 
   @override
   void initState() {
@@ -124,6 +125,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
           'date': Provider.of<HistoryProvider>(context, listen: false).date!.replaceFirst('Z', '+00:00'),
           'title' : title,
           'content' : content,
+          'isPublic' : isPublic as String,
         }),
       ); //post
       print("update Status Code: ${response.statusCode}");
@@ -358,7 +360,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                         thickness: 1,
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -404,7 +406,6 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    // "hello",
                                     "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
@@ -433,12 +434,12 @@ class _HistoryState extends State<History> with ChangeNotifier {
                         ],
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Expanded(
                         child: isModifing
                           ? Container(
-                              margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                              margin: EdgeInsets.only(bottom: 20),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: Color.fromARGB(255, 217, 217, 217),
@@ -473,7 +474,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                                         color: Colors.black26,
                                       ),
                                       hintText: 'Enter brief description',
-                                      contentPadding: EdgeInsets.only(left: 5, top: 50, bottom: 0),
+                                      contentPadding: EdgeInsets.only(left: 5),
                                     ),
                                   ),
                                 ],
@@ -485,29 +486,80 @@ class _HistoryState extends State<History> with ChangeNotifier {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    title,
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
+                                  title == ""
+                                  ? Text(
+                                      "Enter title!",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : Text(
+                                      title,
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
                                   const Divider(
                                     color: Color.fromARGB(255, 217, 217, 217),
                                     height: 1,
                                     thickness: 1,
                                   ),
-                                  Text(
-                                    content,
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 20,
-                                    ),
+                                  content == ""
+                                  ? Text(
+                                      "Enter content!",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 20,
+                                      ),
+                                    )
+                                  : Text(
+                                      content,
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 20,
+                                      ),
+                                    )
+                              ],
+                            ),
+                          ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 110,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Text(
+                                  isPublic ? "Public" : "Private",
+                                  style: SafeGoogleFont(
+                                    'NanumGothic',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: isPublic ? Colors.blue : Colors.red,
                                   ),
-                                ],
+                                ),
                               ),
-                            )
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Switch(
+                                    value: isPublic,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isPublic = value;
+                                      });
+                                    }
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),

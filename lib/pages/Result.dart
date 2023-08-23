@@ -27,6 +27,7 @@ class _ResultState extends State<Result> {
   final String saveGPSUrl = "http://44.218.14.132/gps/save";
   String? titleValue = "";
   String? contentValue = "";
+  bool isPublic = false;
 
   Future saveGPS(Gpx gpxData) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
@@ -60,6 +61,7 @@ class _ResultState extends State<Result> {
             'title' : titleValue!,
             'content' : contentValue!,
             // 'city' : ,
+            'isPublic' : isPublic as String,
             'file' : gpxBase64,
           }),
       ); //post
@@ -148,6 +150,15 @@ class _ResultState extends State<Result> {
           actions: [
             TextButton(
               onPressed: () {
+                // print(routeCoordinates);
+                findRegion(routeCoordinates);
+              },
+              child: Text(
+                "test"
+              ),
+            ),
+            TextButton(
+              onPressed: () {
                 saveGPS(gpxData);
               },
               child: Text(
@@ -157,15 +168,6 @@ class _ResultState extends State<Result> {
                   fontSize: 15,
                   color: Colors.blue,
                 ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                // print(routeCoordinates);
-                findRegion(routeCoordinates);
-              },
-              child: Text(
-                "test"
               ),
             ),
           ],
@@ -246,7 +248,7 @@ class _ResultState extends State<Result> {
                       thickness: 1,
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -319,11 +321,11 @@ class _ResultState extends State<Result> {
                       ],
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     Expanded(
                       child: Container(
-                        margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                        margin: EdgeInsets.only(bottom: 0),
                         decoration: BoxDecoration(
                             border: Border.all(
                               color: Color.fromARGB(255, 217, 217, 217),
@@ -333,7 +335,6 @@ class _ResultState extends State<Result> {
                         child: Column(
                           children: [
                             TextField(
-                              // controller: _emailController,
                               // focusNode: _emailFocusNode,
                               onChanged: (value) {
                                 titleValue = value;
@@ -347,7 +348,6 @@ class _ResultState extends State<Result> {
                               ),
                             ),
                             TextField(
-                              // controller: _emailController,
                               // focusNode: _emailFocusNode,
                               onChanged: (value) {
                                 contentValue = value;
@@ -358,7 +358,41 @@ class _ResultState extends State<Result> {
                                   color: Colors.black26,
                                 ),
                                 hintText: 'Enter brief description',
-                                contentPadding: EdgeInsets.only(left: 5, top: 50, bottom: 0),
+                                contentPadding: EdgeInsets.only(left: 5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: 110,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Text(
+                                isPublic ? "Public" : "Private",
+                                style: SafeGoogleFont(
+                                  'NanumGothic',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: isPublic ? Colors.blue : Colors.red,
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Switch(
+                                value: isPublic,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isPublic = value;
+                                  });
+                                }
                               ),
                             ),
                           ],
