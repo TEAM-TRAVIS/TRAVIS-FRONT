@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart' as geo;
+import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -27,6 +27,7 @@ class Map extends StatefulWidget {
 }
 
 class MapState extends State<Map> with ChangeNotifier {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late GoogleMapController mapController;
   late Timer timer;
   DateTime? currentBackPressTime;
@@ -36,6 +37,7 @@ class MapState extends State<Map> with ChangeNotifier {
   bool isRunning = false;
   static const double fabHeightClose = 100;
   double fabHeight = fabHeightClose;
+  String currentRegion = "";
   LocationData? currentLocation = LocationData.fromMap({
     "latitude": 37.7749,
     "longitude": -122.4194,
@@ -72,11 +74,9 @@ class MapState extends State<Map> with ChangeNotifier {
       accuracy: LocationAccuracy.high,
       distanceFilter: 5,
     );
-
     location.onLocationChanged
         .throttle((_) => TimerStream(true, const Duration(seconds: 1)))
-        .listen((LocationData locationData) {
-        // 위치 서비스를 통해 새로운 위치 정보가 있을 때마다 해당 정보를 수신하고 이벤트를 처리
+        .listen((LocationData locationData) async {
       setState(() {
         currentLocation = locationData;
         if (isTracking) {
@@ -94,7 +94,6 @@ class MapState extends State<Map> with ChangeNotifier {
               Wpt(
                 lat: locationData.latitude!,
                 lon: locationData.longitude!,
-                ele: locationData.altitude!,
                 time: DateTime.now(),
               )
             );
@@ -110,13 +109,13 @@ class MapState extends State<Map> with ChangeNotifier {
       });
       mapController.animateCamera(
         CameraUpdate.newLatLng(
-          LatLng(locationData.latitude!, locationData.longitude!)),
+            LatLng(locationData.latitude!, locationData.longitude!)),
       );
     });
   }
 
   double calculateDistance(LatLng latLng1, LatLng latLng2) {
-    double distanceInMeters = geo.Geolocator.distanceBetween(
+    double distanceInMeters = geolocator.Geolocator.distanceBetween(
       latLng1.latitude,
       latLng1.longitude,
       latLng2.latitude,
@@ -182,11 +181,21 @@ class MapState extends State<Map> with ChangeNotifier {
           settings: RouteSettings(arguments: args),
         ),
       );
-    } else {
-      Fluttertoast.showToast(
-        msg: "Invalid data entered!",
-        toastLength: Toast.LENGTH_SHORT,
-        timeInSecForIosWeb: 3,
+    } else if (totalDistance == 0 || milliseconds == 0) {
+      // Fluttertoast.showToast(
+      //   msg: "Invalid data entered!",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   timeInSecForIosWeb: 3,
+      // );
+      // setState(() {
+      //   milliseconds = 0;
+      // });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Result(),
+          settings: RouteSettings(arguments: args),
+        ),
       );
     }
   }
@@ -212,6 +221,7 @@ class MapState extends State<Map> with ChangeNotifier {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
+          key: scaffoldKey,
           appBar: AppBar(
             title: Text("Record",
               style: SafeGoogleFont(
@@ -225,17 +235,16 @@ class MapState extends State<Map> with ChangeNotifier {
             elevation: 0.0,
             leading: IconButton(
               onPressed: () {
-                debugPrint("home menu button clicked");
+                scaffoldKey.currentState?.openDrawer();
               },
               icon: Icon(
                 Icons.menu,
                 color: Colors.blue,
-                ),
               ),
+            ),
             actions: [
               IconButton(
                 onPressed: () {
-                  print(panelHeightClose);
                   debugPrint("settings button clicked");
                 },
                 icon: Icon(
@@ -256,6 +265,75 @@ class MapState extends State<Map> with ChangeNotifier {
                 ),
               ),
             ],
+          ),
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                UserAccountsDrawerHeader(
+                  accountName: Text(
+                    "Name",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  accountEmail: Text(Provider.of<UserProvider>(context, listen: false).userEmail!),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    backgroundImage: AssetImage('assets/1661526553810-3.jpg'),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(15),
+                      bottomLeft: Radius.circular(15),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: ListTile(
+                    leading: Icon(Icons.feed_outlined),
+                    title: Text(
+                      'Feed',
+                    ),
+                    onTap: () {
+                      // Navigator.push(context, MaterialPageRoute(
+                      //     builder: (context) => Feed()));
+                    },
+                    trailing: Icon(Icons.add),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text(
+                      'Profile Setting',
+                    ),
+                    onTap: () {
+                      // Navigator.push(context, MaterialPageRoute(
+                      //     builder: (context) => Feed()));
+                    },
+                    trailing: Icon(Icons.add),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: ListTile(
+                    leading: Icon(Icons.question_answer),
+                    title: Text(
+                      'Q&A',
+                    ),
+                    onTap: () {
+                      // Navigator.push(context, MaterialPageRoute(
+                      //     builder: (context) => Feed()));
+                    },
+                    trailing: Icon(Icons.add),
+                  ),
+                ),
+              ],
+            ),
           ),
           body: Stack(
             children: [
@@ -292,7 +370,8 @@ class MapState extends State<Map> with ChangeNotifier {
                   backgroundColor: Colors.white,
                   onPressed: () {
                     mapController.animateCamera(
-                      CameraUpdate.newLatLng(LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
+                      CameraUpdate.newLatLng(
+                          LatLng(currentLocation!.latitude!, currentLocation!.longitude!)),
                     );
                   },
                   child: Icon(
