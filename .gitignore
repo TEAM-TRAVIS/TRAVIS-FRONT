@@ -39,3 +39,5 @@ build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/HKMGz54SZpwvn9z
 *.xml
 *.xcconfig
 *.sh
+*.iml
+*.swift
