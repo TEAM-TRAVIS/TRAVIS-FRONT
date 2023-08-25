@@ -102,8 +102,6 @@ class _ResultState extends State<Result> {
       locality = placemarks.first.locality ?? "Unknown location";
       print(locality);
       region.add(locality);
-      region = region.where((city) => city.length >= 5).toList();
-      result = region.join(", ");
     }
     region = region.where((city) => city.length >= 5).toList();
     result = region.join(", ");
