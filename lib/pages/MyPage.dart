@@ -213,7 +213,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                   Navigator.pop(context);
                 },
                 icon: const Icon(
-                  Icons.home,
+                  Icons.map_rounded,
                   color: Color.fromARGB(255, 236, 246, 255),
                 ),
               ),
