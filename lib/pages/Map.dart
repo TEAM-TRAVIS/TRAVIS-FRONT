@@ -1,4 +1,5 @@
 import 'package:Travis/User.dart';
+import 'package:Travis/pages/Feed.dart';
 import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
@@ -245,10 +246,11 @@ class MapState extends State<Map> with ChangeNotifier {
             actions: [
               IconButton(
                 onPressed: () {
-                  debugPrint("settings button clicked");
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => Feed()));
                 },
                 icon: Icon(
-                  Icons.settings,
+                  Icons.feed_outlined,
                   color: Colors.blue[500],
                 ),
               ),
@@ -280,7 +282,7 @@ class MapState extends State<Map> with ChangeNotifier {
                   accountEmail: Text(Provider.of<UserProvider>(context, listen: false).userEmail!),
                   currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
-                    backgroundImage: AssetImage('assets/1661526553810-3.jpg'),
+                    // backgroundImage: AssetImage('assets/1661526553810-3.jpg'),
                   ),
                   decoration: BoxDecoration(
                     color: Colors.blue,
@@ -298,8 +300,8 @@ class MapState extends State<Map> with ChangeNotifier {
                       'Feed',
                     ),
                     onTap: () {
-                      // Navigator.push(context, MaterialPageRoute(
-                      //     builder: (context) => Feed()));
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => Feed()));
                     },
                     trailing: Icon(Icons.add),
                   ),
@@ -307,9 +309,9 @@ class MapState extends State<Map> with ChangeNotifier {
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: ListTile(
-                    leading: Icon(Icons.person),
+                    leading: Icon(Icons.settings),
                     title: Text(
-                      'Profile Setting',
+                      'Setting',
                     ),
                     onTap: () {
                       // Navigator.push(context, MaterialPageRoute(
