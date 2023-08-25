@@ -1,5 +1,5 @@
 import 'package:Travis/User.dart';
-import 'package:Travis/pages/Map.dart';
+import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
@@ -23,15 +23,10 @@ class Travis extends StatelessWidget {
 			DeviceOrientation.portraitDown,
 		]);
 
-			// MultiProvider(
-			// providers: [
-			// 	ChangeNotifierProvider(create: (context) => ),
-			// 	ChangeNotifierProvider(create: (context) => ),
-			// ],
-		  // child:
 		return MultiProvider(
 			providers: [
 				ChangeNotifierProvider(create: (context) => UserProvider()),
+				ChangeNotifierProvider(create: (context) => HistoryProvider()),
 			],
 		  child: MaterialApp(
 		    	title: 'Travis',

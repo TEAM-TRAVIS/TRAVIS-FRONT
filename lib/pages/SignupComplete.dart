@@ -60,7 +60,7 @@ class SignupComplete extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  print("Let's go button clicked");
+                  debugPrint("Let's go button clicked");
                   Navigator.push(context, MaterialPageRoute(
                   builder: (context) => const Map()));
                 },

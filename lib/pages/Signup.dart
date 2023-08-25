@@ -6,10 +6,9 @@ import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
 
 class Signup extends StatefulWidget {
-  const Signup({Key? key}) : super(key: key);
+  const Signup({super.key});
 
   @override
   State<Signup> createState() => _SignupState();
@@ -23,10 +22,10 @@ class _SignupState extends State<Signup> {
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final String url = "http://44.218.14.132/user/signup";
+  User user = User('', '', '');
 
-  final String url = "http://172.17.96.1:3000/user/signup";
-  Map<String, dynamic> responseData = {};
-  Future save() async {
+  Future Signup() async {
     try {
       var response = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -36,13 +35,15 @@ class _SignupState extends State<Signup> {
             'name': user.name,
             'email': user.email,
             'password': user.password,
-          })); //post
+          })
+      ); //post
       print(response.statusCode);
+      print(response.body);
       if (response.statusCode == 201) {
         Navigator.push(context, MaterialPageRoute(
             builder: (context) => Login()));
       } else if (response.statusCode == 400) {
-        responseData = jsonDecode(response.body);
+        Map<String, dynamic> responseData = jsonDecode(response.body);
         String message = responseData['error'];
         Fluttertoast.showToast(
           msg: message,
@@ -50,10 +51,10 @@ class _SignupState extends State<Signup> {
           timeInSecForIosWeb: 3,
         );
       } else {
-        print('요청에 실패하였습니다.');
+        debugPrint('요청에 실패하였습니다.');
       }
   } catch (e) {
-  print('오류 발생: $e');
+  debugPrint('오류 발생: $e');
   }
 }
 
@@ -73,13 +74,12 @@ class _SignupState extends State<Signup> {
     _emailFocusNode.unfocus();
     _passwordFocusNode.unfocus();
   }
-  User user = User('', '', '');
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _hideKeyboard,
       child: Scaffold(
-        // resizeToAvoidBottomInset: true,
         body: SingleChildScrollView(
           child: Center(
             child: Form(
@@ -255,10 +255,10 @@ class _SignupState extends State<Signup> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          print("ok");
-                          save();
+                          debugPrint("ok");
+                          Signup();
                         } else {
-                          print("not ok");
+                          debugPrint("not ok");
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -283,8 +283,11 @@ class _SignupState extends State<Signup> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(
-                              builder: (context) => const SignupComplete()));
+                          Navigator.pushAndRemoveUntil(context,
+                            MaterialPageRoute(
+                            builder:
+                              (BuildContext context) => SignupComplete()),
+                              (route) => false);
                         },
                         child: Text("Terms of Use",
                           style: TextStyle(

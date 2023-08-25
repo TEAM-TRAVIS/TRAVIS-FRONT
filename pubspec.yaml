@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_sign_in: ^5.0.0
+  google_sign_in: ^6.1.4
   flutter_native_splash: ^2.3.1
   http: ^1.1.0
   google_maps_flutter: ^2.4.0
@@ -18,14 +18,20 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   fluttertoast: ^8.2.2
   intl: ^0.18.1
-  geolocator: ^9.0.2
+  geolocator: ^10.0.0
   cupertino_icons: ^1.0.2
-  google_fonts: ^4.0.4
+  google_fonts: ^5.1.0
   permission_handler: ^10.2.0
   rxdart: ^0.27.7
   gpx: ^2.2.1
   xml: ^6.3.0
   provider: ^6.0.5
+  geocoding: ^2.0.2
+  flutter_background_service: ^5.0.1
+  flutter_background_service_android: ^6.0.1
+  flutter_background_service_ios: ^5.0.0
+  flutter_local_notifications: ^15.1.0+1
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

@@ -21,8 +21,8 @@ class _LoginState extends State<Login> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  final String url = "http://172.17.96.1:3000/user/login";
-  Future save() async {
+  final String url = "http://44.218.14.132/user/login";
+  Future Login() async {
     try {
       var res = await http.post(Uri.parse(url),
           headers: <String, String>{
@@ -34,23 +34,25 @@ class _LoginState extends State<Login> {
           })
       ); //post
       print(res.statusCode);
-      print(res);
-      if (res.statusCode == 302) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (context) => Map()));
+      print(res.body);
+      if (res.statusCode == 200) {
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+          builder: (BuildContext context) => Map()
+        ),
+        (route) => false);
       }
       else if (res.statusCode == 401) {
-        print('로그인 실패');
+        // debugPrint('로그인 실패');
         Fluttertoast.showToast(
           msg: "Check your email or password",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 3,
         );
       } else {
-        print('요청에 실패하였습니다.');
+        debugPrint('요청에 실패하였습니다.');
       }
     } catch (e) {
-      print('오류 발생: $e');
+      debugPrint('오류 발생: $e');
     }
   }
 
@@ -185,9 +187,8 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.fromLTRB(265, 0, 0, 0),
                   child: ElevatedButton(
                     onPressed: () {
-                      save();
+                      Login();
                       Provider.of<UserProvider>(context, listen: false).setUserInfo(user.email);
-                      // print("뿌르를르르르르르 ${user}");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[800],
@@ -205,7 +206,7 @@ class _LoginState extends State<Login> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        print("Forgot button clicked");
+                        debugPrint("Forgot button clicked");
                       },
                       child: Text("Forgot Password?",
                         style: TextStyle(
