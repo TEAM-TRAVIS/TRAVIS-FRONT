@@ -51,6 +51,12 @@ class MapState extends State<Map> with ChangeNotifier {
     initLocation();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    milliseconds = 0;
+  }
+
   void initLocation() async {
     Location location = Location();
     bool serviceEnabled;
@@ -183,22 +189,20 @@ class MapState extends State<Map> with ChangeNotifier {
         ),
       );
     } else if (totalDistance == 0 || milliseconds == 0) {
-      // Fluttertoast.showToast(
-      //   msg: "Invalid data entered!",
-      //   toastLength: Toast.LENGTH_SHORT,
-      //   timeInSecForIosWeb: 3,
-      // );
-      // setState(() {
-      //   milliseconds = 0;
-      // });
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const Result(),
-          settings: RouteSettings(arguments: args),
-        ),
+      Fluttertoast.showToast(
+        msg: "Invalid data entered!",
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIosWeb: 3,
       );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => const Result(),
+      //     settings: RouteSettings(arguments: args),
     }
+    // setState(() {
+    //   milliseconds = 0;
+    // });
   }
 
   Future<bool> onWillPop() async {
@@ -488,7 +492,7 @@ class MapState extends State<Map> with ChangeNotifier {
                                   gpx.metadata = Metadata(
                                     name: Provider.of<UserProvider>(context, listen: false).userEmail,
                                     desc: (milliseconds~/1000).toString(),
-                                    keywords: (totalDistance/1000).toString(),
+                                    keywords: (totalDistance/1000).toStringAsFixed(1),
                                     bounds: Bounds(
                                       minlat: latmin,
                                       minlon: lonmin,
