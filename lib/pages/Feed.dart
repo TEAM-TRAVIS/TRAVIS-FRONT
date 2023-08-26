@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:Travis/pages/MyPage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +16,16 @@ class Feed extends StatefulWidget {
 class _FeedState extends State<Feed> {
   ScrollController _scrollController = ScrollController();
   bool _isLoading = false; // 로딩 상태 확인
-  static int page = 1;
-  static int limit = 7;
-  String getAllPublicSummaryUrl = "localhost:3000/feed?page=$page&limit=$limit";
+  int pageCount = 1;
+  int numberOfFeed = 3;
   List<dynamic> feedItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    getAllPublicSummary();
+  }
 
   void _scrollListener() {
     if (_scrollController.position.pixels ==
@@ -32,24 +40,19 @@ class _FeedState extends State<Feed> {
         _isLoading = true;
       });
 
-      try {
-        var response = await http.get(Uri.parse(getAllPublicSummaryUrl)); //post
+      var response = await http.get(Uri.parse(
+          "http://44.218.14.132/feed?page=$pageCount&limit=$numberOfFeed")); //get
 
-        print(response.statusCode);
-        print(response.body);
+      print(response.statusCode);
 
-        if (response.statusCode == 201) {
-          print("legend");
-        }
-      } catch (e) {
-        debugPrint('오류 발생: $e');
-      }
+      var data = jsonDecode(response.body);
 
       setState(() {
-        feedItems.addAll(
-            List.generate(10, (index) => '추가된 항목 ${index + 1}'));
-        page++;
+        feedItems.addAll(data['summaries']);
+        pageCount++;
         _isLoading = false;
+        // print("피드 아이템의 개수입니다. ${feedItems.length}");
+        // print("페이지 번호입니다. $pageCount");
       });
     }
   }
@@ -60,7 +63,7 @@ class _FeedState extends State<Feed> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(
-            "Record",
+            "Feed",
             style: SafeGoogleFont(
               'MuseoModerno',
               fontSize: 21,
@@ -78,7 +81,19 @@ class _FeedState extends State<Feed> {
           ),
           actions: [
             TextButton(
-                onPressed: () {getAllPublicSummary();},
+              onPressed: () {
+                feedItems.clear();
+              },
+              child: Text(
+                "refresh",
+              ),
+            ),
+            TextButton(
+                onPressed: () {
+                  // getAllPublicSummary();
+                  // print(feedItems);
+                  // print(feedItems.length);
+                },
                 child: Text("test"),
                 ),
             IconButton(
@@ -97,33 +112,36 @@ class _FeedState extends State<Feed> {
 
   Widget _postsListView(BuildContext context) {
     return ListView.builder(
-      itemCount: 3,
+        controller: _scrollController,
+        itemCount: feedItems.length + 1,
       itemBuilder: (context, index) {
-        return _postView(context);
+        if (index < feedItems.length) {
+          return _postView(context, index);
+        } else if (_isLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return SizedBox.shrink();
+        }
       }
     );
   }
 
-  Widget _postView(BuildContext context) {
+  Widget _postView(BuildContext context, int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _postAuthorRow(context),
-        _postImage(),
-        SizedBox(
-          height: 5,
-        ),
-        _postCaption(),
+        _postAuthorRow(context, index),
+        _postImage(context, index),
+        SizedBox(height: 5),
+        _postCaption(context, index),
         _postCommentsButton(context),
-        SizedBox(
-          height: 20,
-        )
+        SizedBox(height: 20),
       ],
     );
   }
 
   /// 유저 프로필 이미지 및 유저 이름 -> 이곳을 누르면 해당 유저 프로필로 넘어가야함.
-  Widget _postAuthorRow(BuildContext context) {
+  Widget _postAuthorRow(BuildContext context, int index) {
     const double avatarDiameter = 44;
     return GestureDetector(
       // onTap: () => BlocProvider.of<HomeNavigatorCubit>(context).showProfile(),
@@ -161,7 +179,7 @@ class _FeedState extends State<Feed> {
   }
 
   /// 게시물의 사진 -> 우리에게는 경로 캡쳐 이미지
-  Widget _postImage() {
+  Widget _postImage(BuildContext context, int index) {
     return AspectRatio(
       aspectRatio: 1,
       child: CachedNetworkImage(
@@ -173,7 +191,7 @@ class _FeedState extends State<Feed> {
   }
 
   /// 게시물의 텍스트
-  Widget _postCaption() {
+  Widget _postCaption(BuildContext context, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -183,14 +201,14 @@ class _FeedState extends State<Feed> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'title',
+            feedItems[index]['title'],
             style: SafeGoogleFont(
               'NanumGothic',
               fontWeight: FontWeight.bold
             ),
           ),
           Text(
-            'content',
+            feedItems[index]['content'],
             style: SafeGoogleFont(
               'NanumGothic',
             ),
