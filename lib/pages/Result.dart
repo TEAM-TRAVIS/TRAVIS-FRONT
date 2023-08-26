@@ -45,6 +45,7 @@ class _ResultState extends State<Result> {
     /// document에서 현재 경로의 distance 분리
     XmlNode distnode = document.findAllElements('keywords').first;
     String distValue = distnode.innerText;
+    print(distValue);
     /// document에서 현재 경로의 time 분리
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
@@ -60,8 +61,7 @@ class _ResultState extends State<Result> {
             'time' : timeValue,
             'title' : titleValue!,
             'content' : contentValue!,
-            // 'city' : ,
-            'isPublic' : isPublic as String,
+            'isPublic' : isPublic ? "true":"false",
             'file' : gpxBase64,
           }),
       ); //post
@@ -112,7 +112,7 @@ class _ResultState extends State<Result> {
   Widget build(BuildContext context) {
     final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
     final Gpx gpxData = args.gpx;
-    final int milliseconds = args.milliseconds;
+    int milliseconds = args.milliseconds;
     final totalDistance = args.totalDistance;
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.5;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
@@ -133,8 +133,7 @@ class _ResultState extends State<Result> {
           elevation: 0.0,
           leading: TextButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => const Map()));
+              Navigator.pop(context);
             },
             child: Text(
               "Cancel",
@@ -158,6 +157,7 @@ class _ResultState extends State<Result> {
             TextButton(
               onPressed: () {
                 saveGPS(gpxData);
+                // milliseconds = 0;
               },
               child: Text(
                 "Save",
