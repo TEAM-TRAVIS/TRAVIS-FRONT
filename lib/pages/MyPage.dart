@@ -41,18 +41,23 @@ class HistoryProvider extends ChangeNotifier {
 }
 
 class _MyPageState extends State<MyPage> with ChangeNotifier {
+  ScrollController _scrollController = ScrollController();
   HashSet<String> selectedIndexes = HashSet();
   bool isMultiSelectionEnabled = false;
+  bool _isLoading = false; // 로딩 상태 확인
   double toDist = 0.0;
   int toTime = 0;
+  int page = 1;
+  int limit = 7;
   List<dynamic> userData = [];
-  final String getAllSummaryUrl = "http://44.218.14.132/gps/summary/all";
+  // String getAllSummaryUrl = "http://44.218.14.132/gps/summary/all?page=$page&limit=$limit&city1=San%20Francisco&city2=New%20York";
   final String deleteOneSummaryUrl = "http://44.218.14.132/gps/summary";
 
   @override
   void initState() {
     super.initState();
     try {
+      _scrollController.addListener(_scrollListener);
       getAllSummary(context);
     } catch (e) {
       debugPrint("컨텍스트 없는듯");
@@ -63,32 +68,48 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     super.dispose();
   }
 
-  Future getAllSummary(BuildContext contexts) async {
-    try {
-      var response = await http.post(Uri.parse(getAllSummaryUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json;charSet=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
-        }),
-      ); //post
-      print("MyPage Status Code: ${response.statusCode}");
-      if (response.statusCode == 200) {
-        try {
-          var data = jsonDecode(response.body);
-          setState(() {
-            toDist = data['to_dist'].toDouble();
-            toTime = data['to_time'];
-            userData = data['userData'];
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      getAllSummary(context);
+    }
+  }
 
-          });
-        } catch (e) {
-          print(e);
+  Future getAllSummary(BuildContext contexts) async {
+    if (!_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        var response = await http.post(Uri.parse("http://44.218.14.132/gps/summary/all?page=$page&limit=$limit"),
+            headers: <String, String>{
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(<String, String>{
+              'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
+            })
+        ); //post
+
+        print("MyPage Status Code: ${response.statusCode}");
+        print(response.body);
+
+        if (response.statusCode == 200) {
+          try {
+            var data = jsonDecode(response.body);
+            setState(() {
+              toDist = data['to_dist'].toDouble();
+              toTime = data['to_time'];
+              userData.addAll(data['userData']);
+              page++;
+              _isLoading = false;
+            });
+          } catch (e) {
+            print(e);
+          }
         }
+      } catch (e) {
+        debugPrint('오류 발생: $e');
       }
-    } catch (e) {
-      debugPrint('오류 발생: $e');
     }
   }
 
@@ -334,96 +355,108 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: ListView.builder(
+                    controller: _scrollController,
                     itemCount: userData.length,
-                    itemBuilder: (ctx, index) {
+                    itemBuilder: (context, index) {
                       String date = userData[index]['date'];
                       double dist = userData[index]['dist'].toDouble();
                       int time = userData[index]['time'];
-                      return GestureDetector(
-                        onTap: () {
-                          if (isMultiSelectionEnabled) {
-                            doMultiSelection(date);
-                            print("selectedindexes: $selectedIndexes");
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const History(),
-                              ),
-                            );
-                            Provider.of<HistoryProvider>(context, listen: false).setDate(date);
-                            Provider.of<HistoryProvider>(context, listen: false).setDist(dist);
-                            Provider.of<HistoryProvider>(context, listen: false).setTime(time);
-                          }
-                        },
-                        onLongPress: () {
-                          isMultiSelectionEnabled = true;
-                          doMultiSelection(date);
-                          print("selectedindexes: $selectedIndexes");
-                        },
-                        child: Card(
-                          child: Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 200,
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "${dateChange(date)} ${timeChange(date)}",
-                                          style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${dist}km",
-                                          style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          formatTime(time),
-                                          style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: Visibility(
-                                  visible: isMultiSelectionEnabled,
-                                  child: Icon(
-                                    selectedIndexes.contains(date)
-                                        ? Icons.check_circle
-                                        : Icons.radio_button_unchecked,
-                                    size: 30,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      if (index < userData.length) {
+                        return _routeList(context, date, dist, time);
+                      } else if (_isLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else {
+                        return SizedBox.shrink();
+                      }
+
                     }
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _routeList(BuildContext context, date, dist, time) {
+    return GestureDetector(
+      onTap: () {
+        if (isMultiSelectionEnabled) {
+          doMultiSelection(date);
+          print("selectedindexes: $selectedIndexes");
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const History(),
+            ),
+          );
+          Provider.of<HistoryProvider>(context, listen: false).setDate(date);
+          Provider.of<HistoryProvider>(context, listen: false).setDist(dist);
+          Provider.of<HistoryProvider>(context, listen: false).setTime(time);
+        }
+      },
+      onLongPress: () {
+        isMultiSelectionEnabled = true;
+        doMultiSelection(date);
+        print("selectedindexes: $selectedIndexes");
+      },
+      child: Card(
+        child: Stack(
+          alignment: Alignment.centerRight,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 200,
+                  child: Column(
+                    children: [
+                      Text(
+                        "${dateChange(date)} ${timeChange(date)}",
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "${dist}km",
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        formatTime(time),
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Visibility(
+                visible: isMultiSelectionEnabled,
+                child: Icon(
+                  selectedIndexes.contains(date)
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  size: 30,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
