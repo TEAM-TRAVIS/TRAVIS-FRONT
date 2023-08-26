@@ -15,7 +15,6 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:gpx/gpx.dart';
 import 'package:Travis/Arguments.dart';
-import 'package:background_location/background_location.dart' as background_location_package;
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
@@ -46,11 +45,6 @@ class MapState extends State<Map> with ChangeNotifier {
   });
 
   @override
-  void dispose() {
-    background_location_package.BackgroundLocation.stopLocationService();
-    super.dispose();
-  }
-  @override
   void initState() {
     super.initState();
     routeCoordinates = [];
@@ -77,60 +71,14 @@ class MapState extends State<Map> with ChangeNotifier {
       }
     }
 
-    await background_location_package.BackgroundLocation.startLocationService(
-        distanceFilter: 5);
-    background_location_package.BackgroundLocation.getLocationUpdates((locationData) {
-      setState(() {
-        currentLocation = LocationData.fromMap({
-          "latitude": locationData.latitude,
-          "longitude": locationData.longitude,
-          "accuracy" : locationData.accuracy,
-          "altitude" : locationData.altitude,
-          "bearing" : locationData.bearing,
-          "speed" : locationData.speed,
-          "time" : locationData.time,
-          "isMock" : locationData.isMock,
-        });
-        if (isTracking) {
-          if (isRunning) {
-            if (latmin > locationData.latitude!)
-              latmin = locationData.latitude!;
-            if (lonmin > locationData.longitude!)
-              lonmin = locationData.longitude!;
-            if (latmax < locationData.latitude!)
-              latmax = locationData.latitude!;
-            if (lonmax < locationData.longitude!)
-              lonmax = locationData.longitude!;
-
-            gpx.wpts.add(
-                Wpt(
-                  lat: locationData.latitude!,
-                  lon: locationData.longitude!,
-                  time: DateTime.now(),
-                )
-            );
-
-            LatLng currentLatLng =
-            LatLng(locationData.latitude!, locationData.longitude!);
-            if (routeCoordinates.isNotEmpty) {
-              totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
-            }
-            routeCoordinates.add(currentLatLng);
-          }
-        }
-      });
-
-    /*
     location.changeSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 5,
     );
-
     location.onLocationChanged
         .throttle((_) => TimerStream(true, const Duration(seconds: 1)))
         .listen((LocationData locationData) async {
-      setState(()
-      {
+      setState(() {
         currentLocation = locationData;
         if (isTracking) {
           if (isRunning) {
@@ -159,8 +107,7 @@ class MapState extends State<Map> with ChangeNotifier {
             routeCoordinates.add(currentLatLng);
           }
         }
-      }
-      );*/
+      });
       mapController.animateCamera(
         CameraUpdate.newLatLng(
             LatLng(locationData.latitude!, locationData.longitude!)),
@@ -566,13 +513,9 @@ class MapState extends State<Map> with ChangeNotifier {
                           ],
                         ) :
                         ElevatedButton(
-                          onPressed: () async {
+                          onPressed: () {
                             toggleTimer();
                             _startTracking();
-                            await background_location_package.BackgroundLocation.setAndroidNotification(
-                              title: 'Background service is running',
-                              message: 'Background location in progress',
-                            );
                           },
                           style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
