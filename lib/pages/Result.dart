@@ -29,7 +29,7 @@ class _ResultState extends State<Result> {
   String? contentValue = "";
   bool isPublic = false;
 
-  Future saveGPS(Gpx gpxData) async {
+  Future saveGPS(Gpx gpxData, BuildContext context) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     debugPrint("GpxString 출력결과: $gpxString");
     debugPrint("-------------");
@@ -68,9 +68,13 @@ class _ResultState extends State<Result> {
       print(response.statusCode);
       print(response.body);
       if (response.statusCode == 201) {
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (context) => MyPage()));
-    } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MyPage()
+          )
+        );
+      } else {
         Fluttertoast.showToast(
           msg: "Temporary network error occured!",
           toastLength: Toast.LENGTH_SHORT,
@@ -110,298 +114,314 @@ class _ResultState extends State<Result> {
 
   @override
   Widget build(BuildContext context) {
-    final ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
-    final Gpx gpxData = args.gpx;
+    ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
+    Gpx gpxData = args.gpx;
     int milliseconds = args.milliseconds;
-    final totalDistance = args.totalDistance;
+    double totalDistance = args.totalDistance;
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.5;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Result",
-            style: SafeGoogleFont(
-              'MuseoModerno',
-              fontSize: 21,
-              color: Colors.black,
+      home: WillPopScope(
+        onWillPop: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Map(),
             ),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0.0,
-          leading: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(
-              "Cancel",
+          );
+          return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Result",
               style: SafeGoogleFont(
-                'NanumGothic',
-                fontSize: 12,
-                color: Colors.red,
+                'MuseoModerno',
+                fontSize: 21,
+                color: Colors.black,
               ),
             ),
-          ),
-          actions: [
-            TextButton(
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            elevation: 0.0,
+            leading: TextButton(
               onPressed: () {
-                // print(routeCoordinates);
-                findRegion(routeCoordinates);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Map(),
+                  ),
+                );
               },
               child: Text(
-                "test"
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                saveGPS(gpxData);
-                // milliseconds = 0;
-              },
-              child: Text(
-                "Save",
+                "Cancel",
                 style: SafeGoogleFont(
                   'NanumGothic',
-                  fontSize: 15,
-                  color: Colors.blue,
+                  fontSize: 12,
+                  color: Colors.red,
                 ),
               ),
             ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                mapController = controller;
-              },
-              initialCameraPosition: CameraPosition(
-                target: LatLng(((latmax - latmin) / 2 + latmin),
-                    ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
-                zoom:
-                    -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  // print(routeCoordinates);
+                  findRegion(routeCoordinates);
+                },
+                child: Text(
+                  "test"
+                ),
               ),
-              polylines: <Polyline>{
-                Polyline(
-                    polylineId: const PolylineId("route"),
+              TextButton(
+                onPressed: () {
+                  saveGPS(gpxData, context);
+                  // milliseconds = 0;
+                },
+                child: Text(
+                  "Save",
+                  style: SafeGoogleFont(
+                    'NanumGothic',
+                    fontSize: 15,
                     color: Colors.blue,
-                    width: 8,
-                    points: routeCoordinates
+                  ),
                 ),
-              },
-              zoomControlsEnabled: false,
-            ),
-            SlidingUpPanel(
-              minHeight: panelHeightClose,
-              maxHeight: panelHeightOpen,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
               ),
-              boxShadow: const [
-                BoxShadow(
-                    blurRadius: 0
+            ],
+          ),
+          body: Stack(
+            children: [
+              GoogleMap(
+                onMapCreated: (GoogleMapController controller) {
+                  mapController = controller;
+                },
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(((latmax - latmin) / 2 + latmin),
+                      ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
+                  zoom:
+                      -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
                 ),
-              ],
-              header: Padding(
-                padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
-                    borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
-                    boxShadow: const [
-                      BoxShadow(
-                        blurRadius: 0,
+                polylines: <Polyline>{
+                  Polyline(
+                      polylineId: const PolylineId("route"),
+                      color: Colors.blue,
+                      width: 8,
+                      points: routeCoordinates
+                  ),
+                },
+                zoomControlsEnabled: false,
+              ),
+              SlidingUpPanel(
+                minHeight: panelHeightClose,
+                maxHeight: panelHeightOpen,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                      blurRadius: 0
+                  ),
+                ],
+                header: Padding(
+                  padding: const EdgeInsets.only(left: 150, right: 150, top: 5),
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: 100,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 217, 217, 217), // 회색 배경 색상
+                      borderRadius: BorderRadius.circular(10), // 모서리 둥글기 설정
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                panel: Container(
+                  margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Travel path",
+                          style: SafeGoogleFont(
+                            'MuseoModerno',
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Divider(
+                        color: Color.fromARGB(255, 217, 217, 217),
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    formatTime(milliseconds),
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text(
+                                    "Time",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "${(totalDistance/1000).toStringAsFixed(1)}km",
+                                    style: SafeGoogleFont(
+                                      'MuseoModerno',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Divider(
+                                    color: Color.fromARGB(255, 217, 217, 217),
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  Text(
+                                    "Distance",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.normal,
+                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 0),
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color.fromARGB(255, 217, 217, 217),
+                                width: 1,
+                              ),
+                          ),
+                          child: Column(
+                            children: [
+                              TextField(
+                                // focusNode: _emailFocusNode,
+                                onChanged: (value) {
+                                  titleValue = value;
+                                },
+                                decoration: InputDecoration(
+                                  labelStyle: const TextStyle(
+                                    color: Colors.black26,
+                                  ),
+                                  hintText: 'Enter title of your journey',
+                                  contentPadding: EdgeInsets.only(left: 5),
+                                ),
+                              ),
+                              TextField(
+                                // focusNode: _emailFocusNode,
+                                onChanged: (value) {
+                                  contentValue = value;
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  labelStyle: const TextStyle(
+                                    color: Colors.black26,
+                                  ),
+                                  hintText: 'Enter brief description',
+                                  contentPadding: EdgeInsets.only(left: 5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 110,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Text(
+                                  isPublic ? "Public" : "Private",
+                                  style: SafeGoogleFont(
+                                    'NanumGothic',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: isPublic ? Colors.blue : Colors.red,
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Switch(
+                                  value: isPublic,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isPublic = value;
+                                    });
+                                  }
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              panel: Container(
-                margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Travel path",
-                        style: SafeGoogleFont(
-                          'MuseoModerno',
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Divider(
-                      color: Color.fromARGB(255, 217, 217, 217),
-                      height: 1,
-                      thickness: 1,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  formatTime(milliseconds),
-                                  style: SafeGoogleFont(
-                                    'MuseoModerno',
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const Divider(
-                                  color: Color.fromARGB(255, 217, 217, 217),
-                                  height: 1,
-                                  thickness: 1,
-                                ),
-                                Text(
-                                  "Time",
-                                  style: SafeGoogleFont(
-                                    'NanumGothic',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.normal,
-                                    color: const Color.fromARGB(255, 163, 163, 163),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 30,
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "${(totalDistance/1000).toStringAsFixed(1)}km",
-                                  style: SafeGoogleFont(
-                                    'MuseoModerno',
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const Divider(
-                                  color: Color.fromARGB(255, 217, 217, 217),
-                                  height: 1,
-                                  thickness: 1,
-                                ),
-                                Text(
-                                  "Distance",
-                                  style: SafeGoogleFont(
-                                    'NanumGothic',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.normal,
-                                    color: const Color.fromARGB(255, 163, 163, 163),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 0),
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color.fromARGB(255, 217, 217, 217),
-                              width: 1,
-                            ),
-                        ),
-                        child: Column(
-                          children: [
-                            TextField(
-                              // focusNode: _emailFocusNode,
-                              onChanged: (value) {
-                                titleValue = value;
-                              },
-                              decoration: InputDecoration(
-                                labelStyle: const TextStyle(
-                                  color: Colors.black26,
-                                ),
-                                hintText: 'Enter title of your journey',
-                                contentPadding: EdgeInsets.only(left: 5),
-                              ),
-                            ),
-                            TextField(
-                              // focusNode: _emailFocusNode,
-                              onChanged: (value) {
-                                contentValue = value;
-                              },
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                labelStyle: const TextStyle(
-                                  color: Colors.black26,
-                                ),
-                                hintText: 'Enter brief description',
-                                contentPadding: EdgeInsets.only(left: 5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        width: 110,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Text(
-                                isPublic ? "Public" : "Private",
-                                style: SafeGoogleFont(
-                                  'NanumGothic',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: isPublic ? Colors.blue : Colors.red,
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Switch(
-                                value: isPublic,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isPublic = value;
-                                  });
-                                }
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

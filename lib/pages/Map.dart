@@ -1,4 +1,4 @@
-import 'package:Travis/User.dart';
+import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/Feed.dart';
 import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'package:rxdart/rxdart.dart';
 import 'package:gpx/gpx.dart';
 import 'package:Travis/Arguments.dart';
 import 'package:background_location/background_location.dart' as background_location_package;
@@ -47,20 +46,17 @@ class MapState extends State<Map> with ChangeNotifier {
 
   @override
   void dispose() {
-    background_location_package.BackgroundLocation.stopLocationService();
     super.dispose();
+    mapController.dispose();
+    background_location_package.BackgroundLocation.stopLocationService();
   }
+
   @override
   void initState() {
     super.initState();
     routeCoordinates = [];
     initLocation();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    milliseconds = 0;
+    getLocation();
   }
 
   void initLocation() async {
@@ -82,7 +78,9 @@ class MapState extends State<Map> with ChangeNotifier {
         return;
       }
     }
+  }
 
+  void getLocation() async {
     await background_location_package.BackgroundLocation.startLocationService(
         distanceFilter: 5);
     background_location_package.BackgroundLocation.getLocationUpdates((locationData) {
@@ -125,48 +123,6 @@ class MapState extends State<Map> with ChangeNotifier {
           }
         }
       });
-
-    /*
-    location.changeSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 5,
-    );
-
-    location.onLocationChanged
-        .throttle((_) => TimerStream(true, const Duration(seconds: 1)))
-        .listen((LocationData locationData) async {
-      setState(()
-      {
-        currentLocation = locationData;
-        if (isTracking) {
-          if (isRunning) {
-            if (latmin > locationData.latitude!)
-              latmin = locationData.latitude!;
-            if (lonmin > locationData.longitude!)
-              lonmin = locationData.longitude!;
-            if (latmax < locationData.latitude!)
-              latmax = locationData.latitude!;
-            if (lonmax < locationData.longitude!)
-              lonmax = locationData.longitude!;
-
-            gpx.wpts.add(
-              Wpt(
-                lat: locationData.latitude!,
-                lon: locationData.longitude!,
-                time: DateTime.now(),
-              )
-            );
-
-            LatLng currentLatLng =
-              LatLng(locationData.latitude!, locationData.longitude!);
-            if (routeCoordinates.isNotEmpty) {
-              totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
-            }
-            routeCoordinates.add(currentLatLng);
-          }
-        }
-      }
-      );*/
       mapController.animateCamera(
         CameraUpdate.newLatLng(
             LatLng(locationData.latitude!, locationData.longitude!)),
@@ -223,18 +179,20 @@ class MapState extends State<Map> with ChangeNotifier {
     setState(() {
       routeCoordinates.clear();
       isTracking = true;
+      Provider.of<IsTrackingProvider>(context, listen: false).setIsTracking(true);
       totalDistance = 0.0;
     });
   }
 
-  void _stopTracking() {
+  void _stopTracking(context) {
     setState(() {
       isTracking = false;
       totalDistance = calculateTotalDistance();
+      Provider.of<IsTrackingProvider>(context, listen: false).setIsTracking(false);
     });
     ResultArguments args = ResultArguments(gpx, milliseconds, totalDistance);
     if (totalDistance != 0 && milliseconds != 0) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const Result(),
@@ -252,10 +210,9 @@ class MapState extends State<Map> with ChangeNotifier {
       //   MaterialPageRoute(
       //     builder: (context) => const Result(),
       //     settings: RouteSettings(arguments: args),
+      //   ),
+      // );
     }
-    // setState(() {
-    //   milliseconds = 0;
-    // });
   }
 
   Future<bool> onWillPop() async {
@@ -316,7 +273,7 @@ class MapState extends State<Map> with ChangeNotifier {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                      builder: (context) => const MyPage()
+                          builder: (context) => const MyPage()
                       ));
                 },
                 icon: Icon(Icons.home,
@@ -452,7 +409,7 @@ class MapState extends State<Map> with ChangeNotifier {
                 ),
                 boxShadow: const [
                   BoxShadow(
-                    blurRadius: 0
+                      blurRadius: 0
                   ),
                 ],
                 header: Padding(
@@ -499,97 +456,97 @@ class MapState extends State<Map> with ChangeNotifier {
                         height: 20,
                       ),
                       isTracking? // isTracking == true -> 트래킹 중일때는 pause 버튼, stop 버튼
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  toggleTimer();
-                                },
-                                style: isRunning?
-                                  ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
-                                    minimumSize: MaterialStateProperty.all(const Size(100, 38)),
-                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
-                                  ButtonStyle(
-                                      backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 83, 123, 248)),
-                                      minimumSize: MaterialStateProperty.all(const Size(100, 38)),
-                                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                                child: isRunning?
-                                  Text("Pause",
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ):
-                                  Text("Resume",
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 30,
-                            ),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  toggleTimer();
-                                  _stopTracking();
-
-                                  gpx.metadata = Metadata(
-                                    name: Provider.of<UserProvider>(context, listen: false).userEmail,
-                                    desc: (milliseconds~/1000).toString(),
-                                    keywords: (totalDistance/1000).toStringAsFixed(1),
-                                    bounds: Bounds(
-                                      minlat: latmin,
-                                      minlon: lonmin,
-                                      maxlat: latmax,
-                                      maxlon: lonmax,
-                                    ),
-                                  );
-                                },
-                                style: ButtonStyle(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                toggleTimer();
+                              },
+                              style: isRunning?
+                              ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
-                                  fixedSize: MaterialStateProperty.all(const Size(100, 38)),
+                                  minimumSize: MaterialStateProperty.all(const Size(100, 38)),
+                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))) :
+                              ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 83, 123, 248)),
+                                  minimumSize: MaterialStateProperty.all(const Size(100, 38)),
                                   shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                                child: Text("Stop",
-                                  style: SafeGoogleFont(
-                                    'MuseoModerno',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              child: isRunning?
+                              Text("Pause",
+                                style: SafeGoogleFont(
+                                  'MuseoModerno',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ):
+                              Text("Resume",
+                                style: SafeGoogleFont(
+                                  'MuseoModerno',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
-                          ],
-                        ) :
-                        ElevatedButton(
-                          onPressed: () async {
-                            toggleTimer();
-                            _startTracking();
-                            await background_location_package.BackgroundLocation.setAndroidNotification(
-                              title: 'Background service is running',
-                              message: 'Background location in progress',
-                            );
-                          },
-                          style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
-                                  minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
+                          ),
+                          const SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                toggleTimer();
+                                _stopTracking(context);
+
+                                gpx.metadata = Metadata(
+                                  name: Provider.of<UserProvider>(context, listen: false).userEmail,
+                                  desc: (milliseconds~/1000).toString(),
+                                  keywords: (totalDistance/1000).toString(),
+                                  bounds: Bounds(
+                                    minlat: latmin,
+                                    minlon: lonmin,
+                                    maxlat: latmax,
+                                    maxlon: lonmax,
+                                  ),
+                                );
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
+                                  fixedSize: MaterialStateProperty.all(const Size(100, 38)),
                                   shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
-                          child: Text("Start",
-                            style: SafeGoogleFont(
+                              child: Text("Stop",
+                                style: SafeGoogleFont(
+                                  'MuseoModerno',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ) :
+                      ElevatedButton(
+                        onPressed: () async {
+                          toggleTimer();
+                          _startTracking();
+                          await background_location_package.BackgroundLocation.setAndroidNotification(
+                            title: 'Background service is running',
+                            message: 'Background location in progress',
+                          );
+                        },
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 41, 91, 241)),
+                            minimumSize: MaterialStateProperty.all(const Size(double.infinity, 38)),
+                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))),
+                        child: Text("Start",
+                          style: SafeGoogleFont(
                               'MudeoModerno',
                               fontSize: 15,
                               fontWeight: FontWeight.w500
-                            ),
                           ),
                         ),
+                      ),
                       Container(
                         child: Expanded(
                           child: Row(

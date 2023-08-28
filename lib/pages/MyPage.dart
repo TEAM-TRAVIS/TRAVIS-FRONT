@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/History.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -39,6 +40,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   }
 
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -144,209 +146,228 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
 
   @override
   Widget build(BuildContext context) {
+    bool isTracking = Provider.of<IsTrackingProvider>(context, listen: false).isTracking!;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
+      home: WillPopScope(
+        onWillPop: () async { isTracking
+            ? Navigator.pop(context)
+            : Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Map(),
+                ),
+              );
+        return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              isMultiSelectionEnabled
+                  ? getSelectedIndexesCount() :
+              "Travis",
+              style: SafeGoogleFont(
+                'MuseoModerno',
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 236, 246, 255),
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor:
             isMultiSelectionEnabled
-                ? getSelectedIndexesCount() :
-            "Travis",
-            style: SafeGoogleFont(
-              'MuseoModerno',
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 236, 246, 255),
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor:
-          isMultiSelectionEnabled
-              ? const Color.fromARGB(255, 224, 20, 20)
-              : const Color.fromARGB(255, 41, 91, 242),
-          elevation: 0.0,
-          leading:
-          isMultiSelectionEnabled
-              ? IconButton(
-              onPressed: () {
-                setState(() {
-                  selectedIndexes.clear();
-                  isMultiSelectionEnabled = false;
-                });
-              },
-              icon: Icon(Icons.close)
-          )
-              : IconButton(
-            onPressed: () {
-              debugPrint("Menubutton clicked");
-              print(Provider.of<HistoryProvider>(context, listen: false).time!);
-            },
-            icon: const Icon(
-              Icons.menu,
-              color: Color.fromARGB(255, 236, 246, 255),
-            ),
-          ),
-          actions: [
+                ? const Color.fromARGB(255, 224, 20, 20)
+                : const Color.fromARGB(255, 41, 91, 242),
+            elevation: 0.0,
+            leading:
             isMultiSelectionEnabled
                 ? IconButton(
-              onPressed: () {
-                print("delete button clicked");
-                for (var index in selectedIndexes) {
-                  String formattedOutput = index.replaceFirst('Z', '+00:00');
+                onPressed: () {
                   setState(() {
-                    deleteOneSummary(context, formattedOutput);
+                    selectedIndexes.clear();
+                    isMultiSelectionEnabled = false;
                   });
-                }
-              },
-              icon: const Icon(
-                Icons.delete,
-                color: Color.fromARGB(255, 236, 246, 255),
-              ),
+                },
+                icon: Icon(Icons.close)
             )
                 : IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                debugPrint("Menubutton clicked");
+                print(Provider.of<HistoryProvider>(context, listen: false).time!);
               },
               icon: const Icon(
-                Icons.map_rounded,
+                Icons.menu,
                 color: Color.fromARGB(255, 236, 246, 255),
               ),
             ),
-            IconButton(
-              onPressed: () {
-                getAllSummary(context);
-              },
-              icon: const Icon(
-                Icons.refresh,
-                color: Color.fromARGB(255, 236, 246, 255),
+            actions: [
+              isMultiSelectionEnabled
+                  ? IconButton(
+                onPressed: () {
+                  print("delete button clicked");
+                  for (var index in selectedIndexes) {
+                    String formattedOutput = index.replaceFirst('Z', '+00:00');
+                    setState(() {
+                      deleteOneSummary(context, formattedOutput);
+                    });
+                  }
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
+              )
+                  : IconButton(
+                onPressed: () { isTracking
+                  ? Navigator.pop(context)
+                  : Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Map(),
+                      ),
+                    );
+                },
+                icon: const Icon(
+                  Icons.map_rounded,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
               ),
-            ),
-          ],
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Container(
-                height: (MediaQuery.of(context).size.height)/4,
-                color: const Color.fromARGB(255, 41, 91, 242),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]}",
-                          style: SafeGoogleFont(
-                            'MuseoModerno',
-                            fontSize: 27,
-                            fontWeight: FontWeight.bold,
-                            color: const Color.fromARGB(255, 236, 246, 255),
+              IconButton(
+                onPressed: () {
+                  getAllSummary(context);
+                },
+                icon: const Icon(
+                  Icons.refresh,
+                  color: Color.fromARGB(255, 236, 246, 255),
+                ),
+              ),
+            ],
+          ),
+          body: Center(
+            child: Column(
+              children: [
+                Container(
+                  height: (MediaQuery.of(context).size.height)/4,
+                  color: const Color.fromARGB(255, 41, 91, 242),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]}",
+                            style: SafeGoogleFont(
+                              'MuseoModerno',
+                              fontSize: 27,
+                              fontWeight: FontWeight.bold,
+                              color: const Color.fromARGB(255, 236, 246, 255),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.only(top: 25, bottom: 3, left: 30, right: 30),
-                              child: Column(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "Your travel distance",
-                                      textAlign: TextAlign.left,
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color.fromARGB(255, 236, 246, 255),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 25, bottom: 3, left: 30, right: 30),
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        "Your travel distance",
+                                        textAlign: TextAlign.left,
+                                        style: SafeGoogleFont(
+                                          'MuseoModerno',
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color.fromARGB(255, 236, 246, 255),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          "${toDist.toString()}km",
-                                          // "0km",
-                                          style: SafeGoogleFont(
-                                            'MuseoModerno',
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color.fromARGB(255, 236, 246, 255),
+                                    Expanded(
+                                      child: Center(
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            "${toDist.toString()}km",
+                                            // "0km",
+                                            style: SafeGoogleFont(
+                                              'MuseoModerno',
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color.fromARGB(255, 236, 246, 255),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.only(top: 3, bottom: 20, left: 30, right: 30),
-                              child: Column(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "Your travel time",
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color.fromARGB(255, 236, 246, 255),
+                            Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 3, bottom: 20, left: 30, right: 30),
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        "Your travel time",
+                                        style: SafeGoogleFont(
+                                          'MuseoModerno',
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color.fromARGB(255, 236, 246, 255),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      formatTime(toTime),
-                                      style: SafeGoogleFont(
-                                        'MuseoModerno',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color.fromARGB(255, 236, 246, 255),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        formatTime(toTime),
+                                        style: SafeGoogleFont(
+                                          'MuseoModerno',
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color.fromARGB(255, 236, 246, 255),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: userData.length,
-                      itemBuilder: (ctx, index) {
-                        String date = userData[index]['date'];
-                        double dist = userData[index]['dist'].toDouble();
-                        int time = userData[index]['time'];
-                        if (index < userData.length) {
-                          return _routeList(context, date, dist, time);
-                        } else if (_isLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        } else {
-                          return SizedBox.shrink();
-                        }
-                      }
+                          ],
+                        ),
+                      )
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: userData.length,
+                        itemBuilder: (ctx, index) {
+                          String date = userData[index]['date'];
+                          double dist = userData[index]['dist'].toDouble();
+                          int time = userData[index]['time'];
+                          if (index < userData.length) {
+                            return _routeList(context, date, dist, time);
+                          } else if (_isLoading) {
+                            return Center(child: CircularProgressIndicator());
+                          } else {
+                            return SizedBox.shrink();
+                          }
+                        }
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
