@@ -38,7 +38,7 @@ class HistoryProvider extends ChangeNotifier {
 }
 
 class IsTrackingProvider extends ChangeNotifier {
-  bool? _isTracking;
+  bool? _isTracking = false;
 
   bool? get isTracking => _isTracking;
 
