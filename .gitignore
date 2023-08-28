@@ -41,3 +41,4 @@ build/app/intermediates/incremental/debug-mergeJavaRes/zip-cache/HKMGz54SZpwvn9z
 *.sh
 *.iml
 *.swift
+pubspec.lock
