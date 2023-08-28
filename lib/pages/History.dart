@@ -441,7 +441,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
                       Expanded(
                         child: isModifing
                           ? Container(
-                              margin: EdgeInsets.only(bottom: 20),
+                              margin: EdgeInsets.only(bottom: 0),
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: Color.fromARGB(255, 217, 217, 217),
@@ -483,48 +483,48 @@ class _HistoryState extends State<History> with ChangeNotifier {
                               ),
                             )
                           : Container(
-                              width: MediaQuery.of(context).size.width * 0.85,
-                              margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  title == ""
-                                  ? Text(
-                                      "Enter title!",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : Text(
-                                      title,
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                            width: MediaQuery.of(context).size.width * 0.85,
+                            margin: EdgeInsets.only(bottom: 20, left: 1, right: 1),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                title == ""
+                                ? Text(
+                                    "Enter title!",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
+                                  )
+                                : Text(
+                                    title,
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  content == ""
-                                  ? Text(
-                                      "Enter content!",
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 20,
-                                      ),
-                                    )
-                                  : Text(
-                                      content,
-                                      style: SafeGoogleFont(
-                                        'NanumGothic',
-                                        fontSize: 20,
-                                      ),
-                                    )
+                                const Divider(
+                                  color: Color.fromARGB(255, 217, 217, 217),
+                                  height: 1,
+                                  thickness: 1,
+                                ),
+                                content == ""
+                                ? Text(
+                                    "Enter content!",
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 20,
+                                    ),
+                                  )
+                                : Text(
+                                    content,
+                                    style: SafeGoogleFont(
+                                      'NanumGothic',
+                                      fontSize: 20,
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -532,35 +532,9 @@ class _HistoryState extends State<History> with ChangeNotifier {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Container(
+                          margin: isModifing ? EdgeInsets.only(bottom: 0) : EdgeInsets.only(bottom: 10),
                           width: 110,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Text(
-                                  isPublic ? "Public" : "Private",
-                                  style: SafeGoogleFont(
-                                    'NanumGothic',
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: isPublic ? Colors.blue : Colors.red,
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Switch(
-                                    value: isPublic,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        isPublic = value;
-                                      });
-                                    }
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: isModifing ? publicSwitch() : publicText(),
                         ),
                       ),
                     ],
@@ -571,6 +545,57 @@ class _HistoryState extends State<History> with ChangeNotifier {
           ),
         ),
       ),
+    );
+  }
+
+  Widget publicSwitch() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Text(
+            isPublic ? "Public" : "Private",
+            style: SafeGoogleFont(
+              'NanumGothic',
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: isPublic ? Colors.blue : Colors.red,
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Switch(
+            value: isPublic,
+            onChanged: (value) {
+              setState(() {
+                isPublic = value;
+              });
+            }
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget publicText() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            isPublic ? "Public" : "Private",
+            style: SafeGoogleFont(
+              'NanumGothic',
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
+              color: isPublic ? Colors.blue : Colors.red,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
