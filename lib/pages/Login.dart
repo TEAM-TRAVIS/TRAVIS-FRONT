@@ -1,3 +1,4 @@
+import 'package:Travis/Provider.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/pages/Signup.dart';
 import 'package:Travis/pages/Map.dart';
