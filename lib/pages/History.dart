@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:Travis/User.dart';
+import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/Map.dart';
-import 'package:Travis/pages/MyPage.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -206,7 +205,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
       home: WillPopScope(
         onWillPop: () async {
           Navigator.pop(context);
-          return true;
+          return false;
         },
         child: Scaffold(
           appBar: AppBar(
