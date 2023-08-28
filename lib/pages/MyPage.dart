@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/History.dart';
-import 'package:Travis/User.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -15,31 +15,6 @@ class MyPage extends StatefulWidget {
   State<MyPage> createState() => _MyPageState();
 }
 
-class HistoryProvider extends ChangeNotifier {
-  String? _date;
-  double? _dist;
-  int? _time;
-
-  String? get date => _date;
-  double? get dist => _dist;
-  int? get time => _time;
-
-  void setDate(String date) {
-    _date = date;
-    notifyListeners();
-  }
-
-  void setDist(double dist) {
-    _dist = dist;
-    notifyListeners();
-  }
-
-  void setTime(int time) {
-    _time = time;
-    notifyListeners();
-  }
-}
-
 class _MyPageState extends State<MyPage> with ChangeNotifier {
   ScrollController _scrollController = ScrollController();
   HashSet<String> selectedIndexes = HashSet();
@@ -50,7 +25,6 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   int page = 1;
   int limit = 7;
   List<dynamic> userData = [];
-  // String getAllSummaryUrl = "http://44.218.14.132/gps/summary/all?page=$page&limit=$limit&city1=San%20Francisco&city2=New%20York";
   final String deleteOneSummaryUrl = "http://44.218.14.132/gps/summary";
 
   @override
@@ -176,7 +150,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
         appBar: AppBar(
           title: Text(
             isMultiSelectionEnabled
-            ? getSelectedIndexesCount() :
+                ? getSelectedIndexesCount() :
             "Travis",
             style: SafeGoogleFont(
               'MuseoModerno',
@@ -187,66 +161,66 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
           ),
           centerTitle: true,
           backgroundColor:
-            isMultiSelectionEnabled
-            ? const Color.fromARGB(255, 224, 20, 20)
-            : const Color.fromARGB(255, 41, 91, 242),
+          isMultiSelectionEnabled
+              ? const Color.fromARGB(255, 224, 20, 20)
+              : const Color.fromARGB(255, 41, 91, 242),
           elevation: 0.0,
           leading:
-            isMultiSelectionEnabled
-            ? IconButton(
-                onPressed: () {
-                  setState(() {
-                    selectedIndexes.clear();
-                    isMultiSelectionEnabled = false;
-                  });
-                },
-                icon: Icon(Icons.close)
-              )
-            : IconButton(
-                onPressed: () {
-                  debugPrint("Menubutton clicked");
-                  print(Provider.of<HistoryProvider>(context, listen: false).time!);
-                },
-                icon: const Icon(
-                  Icons.menu,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
-              ),
+          isMultiSelectionEnabled
+              ? IconButton(
+              onPressed: () {
+                setState(() {
+                  selectedIndexes.clear();
+                  isMultiSelectionEnabled = false;
+                });
+              },
+              icon: Icon(Icons.close)
+          )
+              : IconButton(
+            onPressed: () {
+              debugPrint("Menubutton clicked");
+              print(Provider.of<HistoryProvider>(context, listen: false).time!);
+            },
+            icon: const Icon(
+              Icons.menu,
+              color: Color.fromARGB(255, 236, 246, 255),
+            ),
+          ),
           actions: [
             isMultiSelectionEnabled
-            ? IconButton(
-                onPressed: () {
-                  print("delete button clicked");
-                  for (var index in selectedIndexes) {
-                    String formattedOutput = index.replaceFirst('Z', '+00:00');
-                    setState(() {
-                      deleteOneSummary(context, formattedOutput);
-                    });
-                  }
-                },
-                icon: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
-              )
-            : IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.map_rounded,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
+                ? IconButton(
+              onPressed: () {
+                print("delete button clicked");
+                for (var index in selectedIndexes) {
+                  String formattedOutput = index.replaceFirst('Z', '+00:00');
+                  setState(() {
+                    deleteOneSummary(context, formattedOutput);
+                  });
+                }
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Color.fromARGB(255, 236, 246, 255),
               ),
-              IconButton(
-                onPressed: () {
-                  getAllSummary(context);
-                },
-                icon: const Icon(
-                  Icons.refresh,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
+            )
+                : IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.map_rounded,
+                color: Color.fromARGB(255, 236, 246, 255),
               ),
+            ),
+            IconButton(
+              onPressed: () {
+                getAllSummary(context);
+              },
+              icon: const Icon(
+                Icons.refresh,
+                color: Color.fromARGB(255, 236, 246, 255),
+              ),
+            ),
           ],
         ),
         body: Center(
@@ -355,21 +329,20 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: userData.length,
-                    itemBuilder: (context, index) {
-                      String date = userData[index]['date'];
-                      double dist = userData[index]['dist'].toDouble();
-                      int time = userData[index]['time'];
-                      if (index < userData.length) {
-                        return _routeList(context, date, dist, time);
-                      } else if (_isLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        return SizedBox.shrink();
+                      controller: _scrollController,
+                      itemCount: userData.length,
+                      itemBuilder: (ctx, index) {
+                        String date = userData[index]['date'];
+                        double dist = userData[index]['dist'].toDouble();
+                        int time = userData[index]['time'];
+                        if (index < userData.length) {
+                          return _routeList(context, date, dist, time);
+                        } else if (_isLoading) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
+                          return SizedBox.shrink();
+                        }
                       }
-
-                    }
                   ),
                 ),
               ),
@@ -461,4 +434,5 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
       ),
     );
   }
+
 }
