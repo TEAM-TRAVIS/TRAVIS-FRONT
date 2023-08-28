@@ -1,10 +1,10 @@
-import 'package:Travis/User.dart';
-import 'package:Travis/pages/MyPage.dart';
+import 'package:Travis/Provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
 import 'package:Travis/pages/CreateAccount.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:Travis/pages/Map.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -27,6 +27,8 @@ class Travis extends StatelessWidget {
 			providers: [
 				ChangeNotifierProvider(create: (context) => UserProvider()),
 				ChangeNotifierProvider(create: (context) => HistoryProvider()),
+				ChangeNotifierProvider(create: (context) => IsTrackingProvider()),
+				ChangeNotifierProvider(create: (context) => RecordInfoProvider()),
 			],
 		  child: MaterialApp(
 		    	title: 'Travis',
@@ -35,6 +37,9 @@ class Travis extends StatelessWidget {
 		    	theme: ThemeData(
 		    		primarySwatch: Colors.blue,
 		    	),
+					routes: {
+						'Map' : (BuildContext context) => Map(),
+					},
 		    	home: const Scaffold(
 		    		body: SingleChildScrollView(
 		    			child: CreateAccount(),
