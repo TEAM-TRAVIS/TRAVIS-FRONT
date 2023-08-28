@@ -32,6 +32,7 @@ dependencies:
   flutter_background_service_ios: ^5.0.0
   flutter_local_notifications: ^15.1.0+1
   cached_network_image: ^3.2.3
+  screenshot: ^2.1.0
 
 dev_dependencies:
   flutter_test:
