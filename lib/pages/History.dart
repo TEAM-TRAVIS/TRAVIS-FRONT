@@ -31,6 +31,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
   final String updateSummaryUrl = "http://44.218.14.132/gps/summary/update";
   String title = "";
   String content = "";
+  String public = "";
   bool isModifing = false;
   bool isPublic = false;
 
@@ -104,6 +105,8 @@ class _HistoryState extends State<History> with ChangeNotifier {
           setState(() {
             title = data['oneSummary']['title'];
             content = data['oneSummary']['content'];
+            isPublic = data['oneSummary']['isPublic'] as bool;
+            print(isPublic);
           });
         } catch (e) {
           print(e);
@@ -125,7 +128,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
           'date': Provider.of<HistoryProvider>(context, listen: false).date!.replaceFirst('Z', '+00:00'),
           'title' : title,
           'content' : content,
-          'isPublic' : isPublic as String,
+          'isPublic' : isPublic ? "true":"false",
         }),
       ); //post
       print("update Status Code: ${response.statusCode}");
