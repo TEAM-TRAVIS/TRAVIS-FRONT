@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:Travis/pages/Result.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:gpx/gpx.dart';
 import 'package:Travis/Arguments.dart';
@@ -18,7 +16,6 @@ import 'package:background_location/background_location.dart' as background_loca
 
 List<LatLng> routeCoordinates = []; // LatLng 객체들을 담는 리스트. 지도상의 경로나 마커 위치 등을 저장하는데 사용.
 var latmin = 400.0 ,latmax = -400.0 ,lonmin = 400.0 ,lonmax = -400.0;
-Gpx gpx = Gpx();
 
 class Map extends StatefulWidget {
   const Map({super.key});
@@ -33,7 +30,7 @@ class MapState extends State<Map> with ChangeNotifier {
   late Timer timer;
   DateTime? currentBackPressTime;
   int milliseconds = 0;
-  double totalDistance = 0.0;
+  double distance = 0.0;
   bool isTracking = false;
   bool isRunning = false;
   static const double fabHeightClose = 100;
@@ -43,6 +40,8 @@ class MapState extends State<Map> with ChangeNotifier {
     "latitude": 37.7749,
     "longitude": -122.4194,
   });
+  Utils utils = Utils();
+  Gpx gpx = Gpx();
 
   @override
   void dispose() {
@@ -88,40 +87,8 @@ class MapState extends State<Map> with ChangeNotifier {
         currentLocation = LocationData.fromMap({
           "latitude": locationData.latitude,
           "longitude": locationData.longitude,
-          "accuracy" : locationData.accuracy,
-          "altitude" : locationData.altitude,
-          "bearing" : locationData.bearing,
-          "speed" : locationData.speed,
-          "time" : locationData.time,
-          "isMock" : locationData.isMock,
         });
-        if (isTracking) {
-          if (isRunning) {
-            if (latmin > locationData.latitude!)
-              latmin = locationData.latitude!;
-            if (lonmin > locationData.longitude!)
-              lonmin = locationData.longitude!;
-            if (latmax < locationData.latitude!)
-              latmax = locationData.latitude!;
-            if (lonmax < locationData.longitude!)
-              lonmax = locationData.longitude!;
-
-            gpx.wpts.add(
-                Wpt(
-                  lat: locationData.latitude!,
-                  lon: locationData.longitude!,
-                  time: DateTime.now(),
-                )
-            );
-
-            LatLng currentLatLng =
-            LatLng(locationData.latitude!, locationData.longitude!);
-            if (routeCoordinates.isNotEmpty) {
-              totalDistance += calculateDistance(routeCoordinates.last, currentLatLng);
-            }
-            routeCoordinates.add(currentLatLng);
-          }
-        }
+        getRouteCoordinates(locationData);
       });
       mapController.animateCamera(
         CameraUpdate.newLatLng(
@@ -130,26 +97,34 @@ class MapState extends State<Map> with ChangeNotifier {
     });
   }
 
-  double calculateDistance(LatLng latLng1, LatLng latLng2) {
-    double distanceInMeters = geolocator.Geolocator.distanceBetween(
-      latLng1.latitude,
-      latLng1.longitude,
-      latLng2.latitude,
-      latLng2.longitude,
-    );
-    return distanceInMeters;
-  }
+  void getRouteCoordinates(locationData) {
+    if (isTracking) {
+      if (isRunning) {
+        if (latmin > locationData.latitude!)
+          latmin = locationData.latitude!;
+        if (lonmin > locationData.longitude!)
+          lonmin = locationData.longitude!;
+        if (latmax < locationData.latitude!)
+          latmax = locationData.latitude!;
+        if (lonmax < locationData.longitude!)
+          lonmax = locationData.longitude!;
 
-  double calculateTotalDistance() {
-    for (int i = 0; i < routeCoordinates.length - 1; i++) {
-      totalDistance += calculateDistance(routeCoordinates[i], routeCoordinates[i + 1]);
+        gpx.wpts.add(
+            Wpt(
+              lat: locationData.latitude!,
+              lon: locationData.longitude!,
+              time: DateTime.now(),
+            )
+        );
+
+        LatLng currentLatLng =
+        LatLng(locationData.latitude!, locationData.longitude!);
+        if (routeCoordinates.isNotEmpty) {
+          distance += utils.calculateDistance(routeCoordinates.last, currentLatLng);
+        }
+        routeCoordinates.add(currentLatLng);
+      }
     }
-    return totalDistance;
-  }
-
-  String formatTime() {
-    Duration duration = Duration(milliseconds: milliseconds);
-    return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
   }
 
   void startTimer() {
@@ -180,18 +155,18 @@ class MapState extends State<Map> with ChangeNotifier {
       routeCoordinates.clear();
       isTracking = true;
       Provider.of<IsTrackingProvider>(context, listen: false).setIsTracking(true);
-      totalDistance = 0.0;
+      distance = 0.0;
     });
   }
 
-  void _stopTracking(context) {
+  void _stopTracking(BuildContext context) {
     setState(() {
       isTracking = false;
-      totalDistance = calculateTotalDistance();
       Provider.of<IsTrackingProvider>(context, listen: false).setIsTracking(false);
     });
-    ResultArguments args = ResultArguments(gpx, milliseconds, totalDistance);
-    if (totalDistance != 0 && milliseconds != 0) {
+
+    ResultArguments args = ResultArguments(gpx, milliseconds, distance);
+    if (distance != 0 && milliseconds != 0) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -199,20 +174,29 @@ class MapState extends State<Map> with ChangeNotifier {
           settings: RouteSettings(arguments: args),
         ),
       );
-    } else if (totalDistance == 0 || milliseconds == 0) {
+    } else if (distance == 0 || milliseconds == 0) {
       Fluttertoast.showToast(
         msg: "Invalid data entered!",
         toastLength: Toast.LENGTH_SHORT,
         timeInSecForIosWeb: 3,
       );
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => const Result(),
-      //     settings: RouteSettings(arguments: args),
-      //   ),
-      // );
     }
+  }
+
+  void pressStopButton(BuildContext context) {
+    toggleTimer();
+    _stopTracking(context);
+    gpx.metadata = Metadata(
+      name: Provider.of<UserProvider>(context, listen: false).userEmail,
+      desc: (milliseconds~/1000).toString(),
+      keywords: (distance/1000).toString(),
+      bounds: Bounds(
+        minlat: latmin,
+        minlon: lonmin,
+        maxlat: latmax,
+        maxlon: lonmax,
+      ),
+    );
   }
 
   Future<bool> onWillPop() async {
@@ -282,75 +266,7 @@ class MapState extends State<Map> with ChangeNotifier {
               ),
             ],
           ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                UserAccountsDrawerHeader(
-                  accountName: Text(
-                    "Name",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  accountEmail: Text(Provider.of<UserProvider>(context, listen: false).userEmail!),
-                  currentAccountPicture: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    // backgroundImage: AssetImage('assets/1661526553810-3.jpg'),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.only(
-                      bottomRight: Radius.circular(15),
-                      bottomLeft: Radius.circular(15),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ListTile(
-                    leading: Icon(Icons.feed_outlined),
-                    title: Text(
-                      'Feed',
-                    ),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => Feed()));
-                    },
-                    trailing: Icon(Icons.add),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text(
-                      'Setting',
-                    ),
-                    onTap: () {
-                      // Navigator.push(context, MaterialPageRoute(
-                      //     builder: (context) => Feed()));
-                    },
-                    trailing: Icon(Icons.add),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: ListTile(
-                    leading: Icon(Icons.question_answer),
-                    title: Text(
-                      'Q&A',
-                    ),
-                    onTap: () {
-                      // Navigator.push(context, MaterialPageRoute(
-                      //     builder: (context) => Feed()));
-                    },
-                    trailing: Icon(Icons.add),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          drawer: drawer(context),
           body: Stack(
             children: [
               GoogleMap(
@@ -455,7 +371,7 @@ class MapState extends State<Map> with ChangeNotifier {
                       const SizedBox(
                         height: 20,
                       ),
-                      isTracking? // isTracking == true -> 트래킹 중일때는 pause 버튼, stop 버튼
+                      isTracking?
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -496,20 +412,7 @@ class MapState extends State<Map> with ChangeNotifier {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                toggleTimer();
-                                _stopTracking(context);
-
-                                gpx.metadata = Metadata(
-                                  name: Provider.of<UserProvider>(context, listen: false).userEmail,
-                                  desc: (milliseconds~/1000).toString(),
-                                  keywords: (totalDistance/1000).toString(),
-                                  bounds: Bounds(
-                                    minlat: latmin,
-                                    minlon: lonmin,
-                                    maxlat: latmax,
-                                    maxlon: lonmax,
-                                  ),
-                                );
+                                pressStopButton(context);
                               },
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(const Color.fromARGB(255, 3, 43, 166)),
@@ -558,7 +461,7 @@ class MapState extends State<Map> with ChangeNotifier {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        formatTime(),
+                                        utils.formatTime(milliseconds),
                                         style: SafeGoogleFont(
                                           'MuseoModerno',
                                           fontSize: 25,
@@ -591,7 +494,7 @@ class MapState extends State<Map> with ChangeNotifier {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       isTracking ?
-                                      Text('${(totalDistance/1000).toStringAsFixed(1)}km',
+                                      Text('${(distance/1000).toStringAsFixed(1)}km',
                                           style: SafeGoogleFont(
                                               'MuseoModerno',
                                               fontSize: 25,
@@ -629,6 +532,77 @@ class MapState extends State<Map> with ChangeNotifier {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget drawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              "Name",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            accountEmail: Text(Provider.of<UserProvider>(context, listen: false).userEmail!),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.white,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(15),
+                bottomLeft: Radius.circular(15),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: ListTile(
+              leading: Icon(Icons.feed_outlined),
+              title: Text(
+                'Feed',
+              ),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => Feed()));
+              },
+              trailing: Icon(Icons.add),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: ListTile(
+              leading: Icon(Icons.settings),
+              title: Text(
+                'Setting',
+              ),
+              onTap: () {
+                // Navigator.push(context, MaterialPageRoute(
+                //     builder: (context) => Feed()));
+              },
+              trailing: Icon(Icons.add),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: ListTile(
+              leading: Icon(Icons.question_answer),
+              title: Text(
+                'Q&A',
+              ),
+              onTap: () {
+                // Navigator.push(context, MaterialPageRoute(
+                //     builder: (context) => Feed()));
+              },
+              trailing: Icon(Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }
