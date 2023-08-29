@@ -40,8 +40,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   }
 
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
+    _scrollController.dispose();
   }
 
   void _scrollListener() {
@@ -208,7 +208,6 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                           String formattedOutput = index.replaceFirst('Z', '+00:00');
                           deleteOneSummary(context, formattedOutput);
                         }
-                        // Navigator.pushReplacementNamed(context,'MyPage');
                       },
                       icon: const Icon(
                         Icons.delete,
@@ -338,6 +337,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                 ),
                               ),
                             ),
+
                           ],
                         ),
                       )
@@ -354,8 +354,10 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                         String date = userData[index]['date'];
                         double dist = userData[index]['dist'].toDouble();
                         int time = userData[index]['time'];
+                        String title = userData[index]['title'];
+                        String? city1 = userData[index]['city1'];
                         if (index < userData.length) {
-                          return _routeList(context, date, dist, time);
+                          return _routeList(context, date, dist, time, title, city1);
                         } else if (_isLoading) {
                           return Center(child: CircularProgressIndicator());
                         } else {
@@ -373,7 +375,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     );
   }
 
-  Widget _routeList(BuildContext context, date, dist, time) {
+  Widget _routeList(BuildContext context, date, dist, time, title, city1) {
     return GestureDetector(
       onTap: () {
         if (isMultiSelectionEnabled) {
@@ -400,6 +402,32 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
         child: Stack(
           alignment: Alignment.centerRight,
           children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: Align(
+                  alignment: Alignment.center,
+                  child:
+                    city1 != null ?
+                    Text(
+                      city1,
+                      style: SafeGoogleFont(
+                        'MuseoModerno',
+                        fontSize: 10,
+                      ),
+                    ) :
+                    Text(
+                      "No city",
+                      style: SafeGoogleFont(
+                        'MuseoModerno',
+                        fontSize: 10,
+                      ),
+                    ),
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -407,6 +435,23 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                   width: 200,
                   child: Column(
                     children: [
+                      title != "" ?
+                      Text(
+                        title,
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ) :
+                      Text(
+                        "No title",
+                        style: SafeGoogleFont(
+                          'MuseoModerno',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       Text(
                         "${dateChange(date)} ${timeChange(date)}",
                         style: SafeGoogleFont(
@@ -415,21 +460,26 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        "${dist}km",
-                        style: SafeGoogleFont(
-                          'MuseoModerno',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        formatTime(time),
-                        style: SafeGoogleFont(
-                          'MuseoModerno',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            "${dist}km",
+                            style: SafeGoogleFont(
+                              'MuseoModerno',
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            formatTime(time),
+                            style: SafeGoogleFont(
+                              'MuseoModerno',
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
