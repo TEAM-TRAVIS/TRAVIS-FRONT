@@ -7,7 +7,7 @@ import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -23,11 +23,14 @@ class Result extends StatefulWidget {
 }
 
 class _ResultState extends State<Result> {
+  final GlobalKey<ScreenshotState> screenshotKey = GlobalKey();
   late GoogleMapController mapController;
+  final screenshotController = ScreenshotController();
   final String saveGPSUrl = "http://44.218.14.132/gps/save";
   String? titleValue = "";
   String? contentValue = "";
   bool isPublic = false;
+  Utils utils = Utils();
 
   Future saveGPS(Gpx gpxData, BuildContext context) async {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
@@ -35,7 +38,6 @@ class _ResultState extends State<Result> {
     debugPrint("-------------");
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
-    findRegion(routeCoordinates);
 
     /// gpxString을 xml 형식으로 parse
     XmlDocument document = XmlDocument.parse(gpxString);
@@ -49,6 +51,7 @@ class _ResultState extends State<Result> {
     /// document에서 현재 경로의 time 분리
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
+    String city1 = await findRegion(routeCoordinates);
 
     try {
       var response = await http.post(Uri.parse(saveGPSUrl),
@@ -63,6 +66,7 @@ class _ResultState extends State<Result> {
             'content' : contentValue!,
             'isPublic' : isPublic ? "true":"false",
             'file' : gpxBase64,
+            'city1' : city1,
           }),
       ); //post
       print(response.statusCode);
@@ -86,14 +90,16 @@ class _ResultState extends State<Result> {
     }
   }
 
-  // void debugPrintZoomLevel() async {
-  //   double zoomLevel = await mapController.getZoomLevel();
-  //   debugPrint('Current Zoom Level: $zoomLevel');
-  // }
-
-  String formatTime(milliseconds) {
-    Duration duration = Duration(milliseconds: milliseconds);
-    return DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
+  Future saveImage(BuildContext context, var image) async {
+    var formData = http.MultipartRequest('POST', Uri.parse("http://44.218.14.132/img/save"));
+    formData.files.add(http.MultipartFile.fromBytes(
+      'file',
+      image,
+      filename: 'image.png',
+    ));
+    var response = await formData.send();
+    print(response.statusCode);
+    print(response);
   }
 
   Future<String> findRegion(routeCoordinates) async {
@@ -117,7 +123,7 @@ class _ResultState extends State<Result> {
     ResultArguments args = ModalRoute.of(context)!.settings.arguments as ResultArguments;
     Gpx gpxData = args.gpx;
     int milliseconds = args.milliseconds;
-    double totalDistance = args.totalDistance;
+    double distance = args.distance;
     double panelHeightOpen = MediaQuery.of(context).size.height * 0.5;
     double panelHeightClose = MediaQuery.of(context).size.height * 0.1;
     return MaterialApp(
@@ -165,9 +171,12 @@ class _ResultState extends State<Result> {
             ),
             actions: [
               TextButton(
-                onPressed: () {
-                  // print(routeCoordinates);
-                  findRegion(routeCoordinates);
+                onPressed: () async {
+                  // final image = await screenshotController.captureFromWidget(googleMap());
+                  // saveImage(context, image);
+                  String city1 = await findRegion(routeCoordinates);
+                  print(city1);
+                  print(city1.runtimeType);
                 },
                 child: Text(
                   "test"
@@ -176,7 +185,7 @@ class _ResultState extends State<Result> {
               TextButton(
                 onPressed: () {
                   saveGPS(gpxData, context);
-                  // milliseconds = 0;
+
                 },
                 child: Text(
                   "Save",
@@ -191,26 +200,7 @@ class _ResultState extends State<Result> {
           ),
           body: Stack(
             children: [
-              GoogleMap(
-                onMapCreated: (GoogleMapController controller) {
-                  mapController = controller;
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(((latmax - latmin) / 2 + latmin),
-                      ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
-                  zoom:
-                      -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
-                ),
-                polylines: <Polyline>{
-                  Polyline(
-                      polylineId: const PolylineId("route"),
-                      color: Colors.blue,
-                      width: 8,
-                      points: routeCoordinates
-                  ),
-                },
-                zoomControlsEnabled: false,
-              ),
+              googleMap(),
               SlidingUpPanel(
                 minHeight: panelHeightClose,
                 maxHeight: panelHeightOpen,
@@ -276,7 +266,7 @@ class _ResultState extends State<Result> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    formatTime(milliseconds),
+                                    utils.formatTime(milliseconds),
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
@@ -310,7 +300,7 @@ class _ResultState extends State<Result> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "${(totalDistance/1000).toStringAsFixed(1)}km",
+                                    "${(distance/1000).toStringAsFixed(1)}km",
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
@@ -424,6 +414,29 @@ class _ResultState extends State<Result> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget googleMap() {
+    return GoogleMap(
+      onMapCreated: (GoogleMapController controller) {
+        mapController = controller;
+      },
+      initialCameraPosition: CameraPosition(
+        target: LatLng(((latmax - latmin) / 2 + latmin),
+            ((lonmax - lonmin) / 2 + lonmin)), // 초기 지도 중심 좌표
+        zoom:
+        -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
+      ),
+      polylines: <Polyline>{
+        Polyline(
+            polylineId: const PolylineId("route"),
+            color: Colors.blue,
+            width: 8,
+            points: routeCoordinates
+        ),
+      },
+      zoomControlsEnabled: false,
     );
   }
 }
