@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/History.dart';
 import 'package:Travis/pages/Map.dart';
+import 'package:Travis/pages/SelectMap.dart';
 import 'package:Travis/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -179,56 +180,60 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                 : const Color.fromARGB(255, 41, 91, 242),
             elevation: 0.0,
             leading:
-            isMultiSelectionEnabled
-                ? IconButton(
-                onPressed: () {
-                  setState(() {
-                    selectedIndexes.clear();
-                    isMultiSelectionEnabled = false;
-                  });
-                },
-                icon: Icon(Icons.close)
-            )
-                : IconButton(
-              onPressed: () {
-                debugPrint("Menubutton clicked");
-                print(Provider.of<HistoryProvider>(context, listen: false).time!);
-              },
-              icon: const Icon(
-                Icons.menu,
-                color: Color.fromARGB(255, 236, 246, 255),
-              ),
-            ),
+              isMultiSelectionEnabled ?
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedIndexes.clear();
+                      isMultiSelectionEnabled = false;
+                    });
+                  },
+                  icon: Icon(Icons.close)
+                ) :
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SelectMap())
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.add_location_alt_rounded,
+                    color: Color.fromARGB(255, 236, 246, 255),
+                  ),
+                ),
             actions: [
-              isMultiSelectionEnabled
-                  ? IconButton(
-                      onPressed: () {
-                        print("delete button clicked");
-                        for (var index in selectedIndexes) {
-                          String formattedOutput = index.replaceFirst('Z', '+00:00');
-                          deleteOneSummary(context, formattedOutput);
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Color.fromARGB(255, 236, 246, 255),
-                      ),
-                    )
-                  : IconButton(
-                      onPressed: () { isTracking
-                        ? Navigator.pop(context)
-                        : Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const Map(),
-                            ),
-                          );
-                      },
-                      icon: const Icon(
-                        Icons.map_rounded,
-                        color: Color.fromARGB(255, 236, 246, 255),
-                      ),
-                    ),
+              isMultiSelectionEnabled ?
+                IconButton(
+                  onPressed: () {
+                    print("delete button clicked");
+                    for (var index in selectedIndexes) {
+                      String formattedOutput = index.replaceFirst('Z', '+00:00');
+                      deleteOneSummary(context, formattedOutput);
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Color.fromARGB(255, 236, 246, 255),
+                  ),
+                ) :
+                IconButton(
+                  onPressed: () {
+                    isTracking ?
+                      Navigator.pop(context) :
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Map(),
+                        ),
+                      );
+                  },
+                  icon: const Icon(
+                    Icons.map_rounded,
+                    color: Color.fromARGB(255, 236, 246, 255),
+                  ),
+                ),
               IconButton(
                 onPressed: () {
                   getAllSummary(context);
