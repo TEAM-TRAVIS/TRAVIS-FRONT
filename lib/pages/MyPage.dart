@@ -21,8 +21,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
   HashSet<String> selectedIndexes = HashSet();
   bool isMultiSelectionEnabled = false;
   bool _isLoading = false; // 로딩 상태 확인
-  double toDist = 0.0;
-  int toTime = 0;
+  double userToDist = 0.0;
+  int userToTime = 0;
   int page = 1;
   int limit = 7;
   List<dynamic> userData = [];
@@ -73,8 +73,8 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
           try {
             var data = jsonDecode(response.body);
             setState(() {
-              toDist = data['to_dist'].toDouble();
-              toTime = data['to_time'];
+              userToDist = data['to_dist'].toDouble();
+              userToTime = data['to_time'];
               userData.addAll(data['userData']);
               page++;
               _isLoading = false;
@@ -102,10 +102,9 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
         }),
       ); //post
       print(response.statusCode);
-      print(response.body);
       if (response.statusCode == 200) {
-        getAllSummary(context);
         selectedIndexes.clear();
+        getAllSummary(context).then((value) => Navigator.pushReplacementNamed(context, 'MyPage'));
       }
     } catch (e) {
       debugPrint('오류 발생: $e');
@@ -152,7 +151,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
       home: WillPopScope(
         onWillPop: () async { isTracking
             ? Navigator.pop(context)
-            : Navigator.push(
+            : Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const Map(),
@@ -203,38 +202,38 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
             actions: [
               isMultiSelectionEnabled
                   ? IconButton(
-                onPressed: () {
-                  print("delete button clicked");
-                  for (var index in selectedIndexes) {
-                    String formattedOutput = index.replaceFirst('Z', '+00:00');
-                    setState(() {
-                      deleteOneSummary(context, formattedOutput);
-                    });
-                  }
-                },
-                icon: const Icon(
-                  Icons.delete,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
-              )
-                  : IconButton(
-                onPressed: () { isTracking
-                  ? Navigator.pop(context)
-                  : Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Map(),
+                      onPressed: () {
+                        print("delete button clicked");
+                        for (var index in selectedIndexes) {
+                          String formattedOutput = index.replaceFirst('Z', '+00:00');
+                          deleteOneSummary(context, formattedOutput);
+                        }
+                        // Navigator.pushReplacementNamed(context,'MyPage');
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Color.fromARGB(255, 236, 246, 255),
                       ),
-                    );
-                },
-                icon: const Icon(
-                  Icons.map_rounded,
-                  color: Color.fromARGB(255, 236, 246, 255),
-                ),
-              ),
+                    )
+                  : IconButton(
+                      onPressed: () { isTracking
+                        ? Navigator.pop(context)
+                        : Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Map(),
+                            ),
+                          );
+                      },
+                      icon: const Icon(
+                        Icons.map_rounded,
+                        color: Color.fromARGB(255, 236, 246, 255),
+                      ),
+                    ),
               IconButton(
                 onPressed: () {
                   getAllSummary(context);
+                  Navigator.pushReplacementNamed(context,'MyPage');
                 },
                 icon: const Icon(
                   Icons.refresh,
@@ -290,7 +289,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                         child: Align(
                                           alignment: Alignment.centerRight,
                                           child: Text(
-                                            "${toDist.toString()}km",
+                                            "${userToDist.toString()}km",
                                             // "0km",
                                             style: SafeGoogleFont(
                                               'MuseoModerno',
@@ -326,7 +325,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                        formatTime(toTime),
+                                        formatTime(userToTime),
                                         style: SafeGoogleFont(
                                           'MuseoModerno',
                                           fontSize: 25,
@@ -349,20 +348,20 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: userData.length,
-                        itemBuilder: (ctx, index) {
-                          String date = userData[index]['date'];
-                          double dist = userData[index]['dist'].toDouble();
-                          int time = userData[index]['time'];
-                          if (index < userData.length) {
-                            return _routeList(context, date, dist, time);
-                          } else if (_isLoading) {
-                            return Center(child: CircularProgressIndicator());
-                          } else {
-                            return SizedBox.shrink();
-                          }
+                      controller: _scrollController,
+                      itemCount: userData.length,
+                      itemBuilder: (context, index) {
+                        String date = userData[index]['date'];
+                        double dist = userData[index]['dist'].toDouble();
+                        int time = userData[index]['time'];
+                        if (index < userData.length) {
+                          return _routeList(context, date, dist, time);
+                        } else if (_isLoading) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
+                          return SizedBox.shrink();
                         }
+                      }
                     ),
                   ),
                 ),

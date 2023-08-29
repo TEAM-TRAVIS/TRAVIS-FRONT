@@ -1,4 +1,5 @@
 import 'package:Travis/Provider.dart';
+import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Travis/utils.dart';
@@ -39,6 +40,7 @@ class Travis extends StatelessWidget {
 		    	),
 					routes: {
 						'Map' : (BuildContext context) => Map(),
+						'MyPage' : (BuildContext context) => MyPage(),
 					},
 		    	home: const Scaffold(
 		    		body: SingleChildScrollView(
