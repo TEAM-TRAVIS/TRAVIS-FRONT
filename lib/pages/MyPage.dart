@@ -52,7 +52,7 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
     }
   }
 
-  Future getAllSummary(BuildContext contexts) async {
+  Future getAllSummary(BuildContext context) async {
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
@@ -181,28 +181,28 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
             elevation: 0.0,
             leading:
               isMultiSelectionEnabled ?
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedIndexes.clear();
-                      isMultiSelectionEnabled = false;
-                    });
-                  },
-                  icon: Icon(Icons.close)
-                ) :
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SelectMap())
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.add_location_alt_rounded,
-                    color: Color.fromARGB(255, 236, 246, 255),
-                  ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    selectedIndexes.clear();
+                    isMultiSelectionEnabled = false;
+                  });
+                },
+                icon: Icon(Icons.close)
+              ) :
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SelectMap())
+                  );
+                },
+                icon: const Icon(
+                  Icons.add_location_alt_rounded,
+                  color: Color.fromARGB(255, 236, 246, 255),
                 ),
+              ),
             actions: [
               isMultiSelectionEnabled ?
                 IconButton(
