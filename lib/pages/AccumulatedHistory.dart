@@ -20,11 +20,10 @@ class AccumulatedHistory extends StatefulWidget {
 }
 
 class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNotifier {
-  TextEditingController _titleEditingController = TextEditingController();
-  TextEditingController _contentEditingController = TextEditingController();
   late GoogleMapController mapController;
   late String? gpxData;
   List<LatLng> route = [];
+  List<dynamic> routes = [];
   final String getGPSUrl = "http://44.218.14.132/gps/detail";
   final String getOneSummaryUrl = "http://44.218.14.132/gps/summary";
   String title = "";
@@ -34,20 +33,17 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
   @override
   void initState() {
     super.initState();
-    getGPS(context);
-    getOneSummary(context);
-    route = [];
+    // route = [];
+    // routes = [];
   }
 
   @override
   void dispose() {
     super.dispose();
     mapController.dispose();
-    _titleEditingController.dispose();
-    _contentEditingController.dispose();
   }
 
-  Future getGPS(BuildContext context) async {
+  Future getGPS(BuildContext context, String date) async {
     try {
       var response = await http.post(
         Uri.parse(getGPSUrl),
@@ -56,7 +52,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
         },
         body: jsonEncode(<String, String>{
           'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
-          'date': Provider.of<HistoryProvider>(context, listen: false).date!,
+          'date': date,
         }),
       ); //post
 
@@ -71,8 +67,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
           List<int> zippedRoute = base64.decode(encodedString);
           List<int> decodedzip = gzip.decode(zippedRoute);
           gpxData = utf8.decode(decodedzip);
-          print("History 페이지의 gpxData: $gpxData");
-          parseGpx(gpxData);
+          // parseGpx(gpxData);
         } catch (e) {
           print(e);
         }
@@ -80,6 +75,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     } catch (e) {
       debugPrint('오류 발생: $e');
     }
+    // return route;
   }
 
   Future getOneSummary(BuildContext context) async {
@@ -112,6 +108,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
   }
 
   void parseGpx(gpxData) {
+  // List<dynamic> parseGpx(gpxData) {
     try {
       final document = XmlDocument.parse(gpxData);
       final wptElements = document.findAllElements('wpt');
@@ -147,6 +144,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     } catch (e) {
       print(e);
     }
+    // return route;
   }
 
   @override
@@ -187,10 +185,21 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
             actions: [
               TextButton(
                 onPressed: () {
-                  print("share button clicked");
+                  print(widget.selectedList);
+
+                  // for (int i = 0; i < widget.selectedList.length; i++) {
+                  //   route = [];
+                  //   routes = [];
+                  //   getGPS(context, widget.selectedList[i])
+                  //       .then((gpxData) => routes.add(parseGpx(gpxData)))
+                  //       .then((_) => print(routes[i]));
+                  //   // getGPS(context, date);
+                  // }
+                  // print(routes.length);
+                  // print(routes[0]);
                 },
                 child: Text(
-                  "Share",
+                  "test",
                   style: SafeGoogleFont(
                     'NanumGothic',
                     fontSize: 15,
@@ -213,19 +222,37 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                   -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
                 ),
                 polylines: <Polyline>{
-                  for (int i = 0; i < route.length - 1; i++)
-                    Polyline(
-                      polylineId: PolylineId("route_$i"),
-                      color: Colors.blue,
-                      width: 5,
-                      points: [route[i], route[i + 1]],
-                    ),
+                  // for (int i = 0; i < routes.length; i++)
+                  //   for (int j = 0; j < routes[i].length - 1; j++)
+                  //     Polyline(
+                  //       polylineId: PolylineId("route_$i"),
+                  //       color: Colors.blue,
+                  //       width: 5,
+                  //       // points: [
+                  //       //   routes[i].first, // 시작점
+                  //       //   ...routes[i],    // 경로의 좌표들
+                  //       //   routes[i].last,
+                  //       // ],
+                  //       points: [routes[i][j], routes[i][j+1]],
+                  //     ),
+                  // for (int j = 0; j < route.length - 1; j++)
+                  //   Polyline(
+                  //     polylineId: PolylineId(""),
+                  //     color: Colors.blue,
+                  //     width: 5,
+                  //     // points: [route[j], route[j+1]],
+                  //     points: [
+                  //       route.first, // 시작점
+                  //       ...route,    // 경로의 좌표들
+                  //       route.last,
+                  //     ],
+                  //   ),
                 },
                 zoomControlsEnabled: false,
               ),
               SlidingUpPanel(
                 minHeight: MediaQuery.of(context).size.height * 0.1,
-                maxHeight: MediaQuery.of(context).size.height * 0.5,
+                maxHeight: MediaQuery.of(context).size.height * 0.3,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
@@ -286,7 +313,8 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    utils.formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
+                                    "hi",
+                                    // utils.formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
@@ -321,7 +349,8 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
+                                    "hi",
+                                    // "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
                                     style: SafeGoogleFont(
                                       'MuseoModerno',
                                       fontSize: 25,
