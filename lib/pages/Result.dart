@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/pages/MyPage.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'package:gpx/gpx.dart';
 import 'package:Travis/Arguments.dart';
 import 'package:xml/xml.dart';
+import 'package:provider/provider.dart';
 
 class Result extends StatefulWidget {
   const Result({super.key});
@@ -36,7 +38,6 @@ class _ResultState extends State<Result> {
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
-    final imageBase64 = base64.encode(image);
 
     /// gpxString을 xml 형식으로 parse
     XmlDocument document = XmlDocument.parse(gpxString);
@@ -46,7 +47,6 @@ class _ResultState extends State<Result> {
     /// document에서 현재 경로의 distance 분리
     XmlNode distnode = document.findAllElements('keywords').first;
     String distValue = distnode.innerText;
-    print(distValue);
     /// document에서 현재 경로의 time 분리
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
@@ -64,9 +64,8 @@ class _ResultState extends State<Result> {
             'title' : titleValue!,
             'content' : contentValue!,
             'isPublic' : isPublic ? "true":"false",
-            'GPSgzip' : gpxBase64,
+            'file' : gpxBase64,
             'city1' : city1,
-            // 'file' : imageBase64,
           }),
       ); //post
       print(response.statusCode);
@@ -90,12 +89,13 @@ class _ResultState extends State<Result> {
     }
   }
 
-  Future saveImage(BuildContext context, var image) async {
+  Future saveImage(BuildContext context, var stream) async {
     var formData = http.MultipartRequest('POST', Uri.parse("http://44.218.14.132/img/save"));
     formData.files.add(http.MultipartFile.fromBytes(
       'file',
-      image,
-      filename: 'image.png',
+      stream,
+      // filename: '${Provider.of<UserProvider>(context, listen: false).userEmail!}/1693343377628_SS',
+      filename: 'miniwa00@gmail.com/1693343377628_SS',
     ));
     var response = await formData.send();
     print(response.statusCode);
@@ -174,11 +174,18 @@ class _ResultState extends State<Result> {
               actions: [
                 TextButton(
                   onPressed: () async {
-                    final image = await screenshotController.capture();
-                    print(image.runtimeType);
-                    final test = base64.encode(image!);
-                    print(test.length);
-                    print(test.runtimeType);
+                    await screenshotController.capture()
+                        .then((value) => value!.toList())
+                        .then((value) => saveImage(context, value));
+                    // print(image.runtimeType);
+                    // print(image);
+                    // http.ByteStream byteStream = Stream.fromIterable(image).asBroadcastStream();
+                    // print(byteStream.runtimeType);
+                    // saveImage(context, byteStream);
+                    // print(image.runtimeType);
+                    // final test = base64.encode(image!);
+                    // print(test.length);
+                    // print(test.runtimeType);
                     // saveGPS(gpxData, context, image);
                     // String city1 = await findRegion(routeCoordinates);
                     // print(city1);
