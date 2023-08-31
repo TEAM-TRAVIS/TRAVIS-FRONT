@@ -29,8 +29,6 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
   String title = "";
   String content = "";
   Utils utils = Utils();
-  final Set<Polyline> _polylines = {};
-  late PolylineId _selectedPolylineId;
 
   @override
   void initState() {
@@ -39,10 +37,8 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     routes = [];
     for (String date in widget.selectedList) {
       getGPS(context, date)
-          // .then((value) => print("initState에서의 route 길이 : ${parseGpx(value).length}"));
           .then((gpxData) => routes.add(parseGpx(gpxData)));
     }
-    // print("routes : $routes");
   }
 
   @override
@@ -114,7 +110,6 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     }
   }
 
-  // void parseGpx(gpxData) {
   List<dynamic> parseGpx(gpxData) {
     route = [];
     try {
@@ -153,26 +148,6 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
       print(e);
     }
     return route;
-  }
-
-  void _drawPolylines() {
-    for (int i = 0; i < routes.length; i++) {
-      PolylineId polylineId = PolylineId('route_$i'); // 고유한 ID 생성
-      Polyline polyline = Polyline(
-        polylineId: polylineId,
-        color: _selectedPolylineId == polylineId
-            ? Colors.blue
-            : Colors.grey,
-        width: 5,
-        points: routes[i],
-        onTap: () {
-          setState(() {
-            _selectedPolylineId = polylineId; // Polyline 선택
-          });
-        },
-      );
-      _polylines.add(polyline);
-    }
   }
 
   @override
@@ -251,20 +226,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                           ...routes[i],    // 경로의 좌표들
                           routes[i].last,
                         ],
-                        // points: [routes[i][j], routes[i][j+1]],
                       ),
-                  // for (int j = 0; j < route.length - 1; j++)
-                  //   Polyline(
-                  //     polylineId: PolylineId(""),
-                  //     color: Colors.blue,
-                  //     width: 5,
-                  //     // points: [route[j], route[j+1]],
-                  //     points: [
-                  //       route.first, // 시작점
-                  //       ...route,    // 경로의 좌표들
-                  //       route.last,
-                  //     ],
-                  //   ),
                 },
                 zoomControlsEnabled: false,
               ),
@@ -319,81 +281,79 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                         height: 1,
                         thickness: 1,
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "hi",
-                                    // utils.formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "00:00:00",
+                                      // utils.formatTime(Provider.of<HistoryProvider>(context, listen: false).time),
+                                      style: SafeGoogleFont(
+                                        'MuseoModerno',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Time",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(
-                                          255, 163, 163, 163),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      "Time",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "hi",
-                                    // "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
-                                    style: SafeGoogleFont(
-                                      'MuseoModerno',
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
+                            const SizedBox(
+                              width: 30,
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "0km",
+                                      // "${Provider.of<HistoryProvider>(context, listen: false).dist}km",
+                                      style: SafeGoogleFont(
+                                        'MuseoModerno',
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  const Divider(
-                                    color: Color.fromARGB(255, 217, 217, 217),
-                                    height: 1,
-                                    thickness: 1,
-                                  ),
-                                  Text(
-                                    "Distance",
-                                    style: SafeGoogleFont(
-                                      'NanumGothic',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.normal,
-                                      color: const Color.fromARGB(255, 163, 163, 163),
+                                    const Divider(
+                                      color: Color.fromARGB(255, 217, 217, 217),
+                                      height: 1,
+                                      thickness: 1,
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      "Distance",
+                                      style: SafeGoogleFont(
+                                        'NanumGothic',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.normal,
+                                        color: const Color.fromARGB(255, 163, 163, 163),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
