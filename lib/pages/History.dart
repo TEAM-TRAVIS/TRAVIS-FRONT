@@ -37,9 +37,9 @@ class _HistoryState extends State<History> with ChangeNotifier {
   @override
   void initState() {
     super.initState();
+    route = [];
     getGPS(context);
     getOneSummary(context);
-    route = [];
   }
 
   @override
