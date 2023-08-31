@@ -29,12 +29,20 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
   String title = "";
   String content = "";
   Utils utils = Utils();
+  final Set<Polyline> _polylines = {};
+  late PolylineId _selectedPolylineId;
 
   @override
   void initState() {
     super.initState();
-    // route = [];
-    // routes = [];
+    route = [];
+    routes = [];
+    for (String date in widget.selectedList) {
+      getGPS(context, date)
+          // .then((value) => print("initState에서의 route 길이 : ${parseGpx(value).length}"));
+          .then((gpxData) => routes.add(parseGpx(gpxData)));
+    }
+    // print("routes : $routes");
   }
 
   @override
@@ -67,7 +75,6 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
           List<int> zippedRoute = base64.decode(encodedString);
           List<int> decodedzip = gzip.decode(zippedRoute);
           gpxData = utf8.decode(decodedzip);
-          // parseGpx(gpxData);
         } catch (e) {
           print(e);
         }
@@ -75,7 +82,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     } catch (e) {
       debugPrint('오류 발생: $e');
     }
-    // return route;
+    return gpxData;
   }
 
   Future getOneSummary(BuildContext context) async {
@@ -107,8 +114,9 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     }
   }
 
-  void parseGpx(gpxData) {
-  // List<dynamic> parseGpx(gpxData) {
+  // void parseGpx(gpxData) {
+  List<dynamic> parseGpx(gpxData) {
+    route = [];
     try {
       final document = XmlDocument.parse(gpxData);
       final wptElements = document.findAllElements('wpt');
@@ -144,7 +152,27 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
     } catch (e) {
       print(e);
     }
-    // return route;
+    return route;
+  }
+
+  void _drawPolylines() {
+    for (int i = 0; i < routes.length; i++) {
+      PolylineId polylineId = PolylineId('route_$i'); // 고유한 ID 생성
+      Polyline polyline = Polyline(
+        polylineId: polylineId,
+        color: _selectedPolylineId == polylineId
+            ? Colors.blue
+            : Colors.grey,
+        width: 5,
+        points: routes[i],
+        onTap: () {
+          setState(() {
+            _selectedPolylineId = polylineId; // Polyline 선택
+          });
+        },
+      );
+      _polylines.add(polyline);
+    }
   }
 
   @override
@@ -185,18 +213,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
             actions: [
               TextButton(
                 onPressed: () {
-                  print(widget.selectedList);
 
-                  // for (int i = 0; i < widget.selectedList.length; i++) {
-                  //   route = [];
-                  //   routes = [];
-                  //   getGPS(context, widget.selectedList[i])
-                  //       .then((gpxData) => routes.add(parseGpx(gpxData)))
-                  //       .then((_) => print(routes[i]));
-                  //   // getGPS(context, date);
-                  // }
-                  // print(routes.length);
-                  // print(routes[0]);
                 },
                 child: Text(
                   "test",
@@ -214,6 +231,7 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
               GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   mapController = controller;
+                  // _drawPolylines();
                 },
                 initialCameraPosition: CameraPosition(
                   target: LatLng(((latmax - latmin) / 2 + latmin),
@@ -221,20 +239,20 @@ class _AccumulatedHistoryState extends State<AccumulatedHistory> with ChangeNoti
                   zoom:
                   -log(max((latmax - latmin), (lonmax - lonmin)) / 256) / ln2,
                 ),
-                polylines: <Polyline>{
-                  // for (int i = 0; i < routes.length; i++)
-                  //   for (int j = 0; j < routes[i].length - 1; j++)
-                  //     Polyline(
-                  //       polylineId: PolylineId("route_$i"),
-                  //       color: Colors.blue,
-                  //       width: 5,
-                  //       // points: [
-                  //       //   routes[i].first, // 시작점
-                  //       //   ...routes[i],    // 경로의 좌표들
-                  //       //   routes[i].last,
-                  //       // ],
-                  //       points: [routes[i][j], routes[i][j+1]],
-                  //     ),
+                polylines: <Polyline> {
+                  for (int i = 0; i < routes.length; i++)
+                    for (int j = 0; j < routes[i].length - 1; j++)
+                      Polyline(
+                        polylineId: PolylineId("route_$i"),
+                        color: Colors.blue,
+                        width: 5,
+                        points: [
+                          routes[i].first, // 시작점
+                          ...routes[i],    // 경로의 좌표들
+                          routes[i].last,
+                        ],
+                        // points: [routes[i][j], routes[i][j+1]],
+                      ),
                   // for (int j = 0; j < route.length - 1; j++)
                   //   Polyline(
                   //     polylineId: PolylineId(""),
