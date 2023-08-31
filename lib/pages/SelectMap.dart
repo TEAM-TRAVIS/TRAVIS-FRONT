@@ -16,58 +16,45 @@ class SelectMap extends StatefulWidget {
 }
 
 class _SelectMapState extends State<SelectMap> with ChangeNotifier {
-  bool _isLoading = false; // 로딩 상태 확인
   bool isMultiSelectionEnabled = false;
   HashSet<String> selectedIndexes = HashSet();
   List<dynamic> userData = [];
   List<String> testCity = ['San Francisco', 'Los Angeles', 'Seoul', 'Tokyo', 'London'];
   HashSet<String> citySet = HashSet();
   List<String> city = [];
-  List<dynamic> classifiedRecord = [];
-  
+
   @override
   void initState() {
     super.initState();
-    // _scrollController.addListener(_scrollListener);
     getAllSummary(context);
   }
 
   Future getAllSummary(BuildContext context) async {
-    if (!_isLoading) {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        var response = await http.post(Uri.parse("http://44.218.14.132/gps/summary/all"),
-            headers: <String, String>{
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode(<String, String>{
-              'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
-            })
-        ); //post
+    try {
+      var response = await http.post(Uri.parse("http://44.218.14.132/gps/summary/all"),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(<String, String>{
+            'email': Provider.of<UserProvider>(context, listen: false).userEmail!,
+          })
+      ); //post
 
-        print("SelectPage Status Code: ${response.statusCode}");
-        // print("바디입니다. ${response.body}");
+      print("SelectPage Status Code: ${response.statusCode}");
 
-        if (response.statusCode == 200) {
-          var decodedData = jsonDecode(response.body);
-          setState(() {
-            // print("뿌르를 ${decodedData['userData']}");
-            userData = decodedData['userData'];
-            // print("아아앙 ${userData[0]['city1']}");
-            for (int i = 0; i < userData.length; i++) {
-              String singleCity = userData[i]['city1'];
-              citySet.add(singleCity);
-            }
-            city = citySet.toList();
-            // print(city);
-            _isLoading = false;
-          });
-        }
-      } catch (e) {
-        debugPrint('오류 발생: $e');
+      if (response.statusCode == 200) {
+        var decodedData = jsonDecode(response.body);
+        setState(() {
+          userData = decodedData['userData'];
+          for (int i = 0; i < userData.length; i++) {
+            String singleCity = userData[i]['city1'];
+            citySet.add(singleCity);
+          }
+          city = citySet.toList();
+        });
       }
+    } catch (e) {
+      debugPrint('오류 발생: $e');
     }
   }
 
@@ -127,7 +114,8 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
             TextButton(
               onPressed: () {
                 getAllSummary(context);
-                // print("유저 데이터입니다. $userData");
+                List<String> selectedList = selectedIndexes.toList();
+                print(selectedList);
               },
               child: Text(
                 "test",
@@ -173,9 +161,7 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
         child: ListView.separated(
           itemCount: city.length,
           separatorBuilder: (context, index) {
-            return const SizedBox(
-              height: 20,
-            );
+            return const SizedBox(height: 20);
           },
           itemBuilder: (context, verticalIndex) {
             return Column(
@@ -219,18 +205,17 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
       height: 100,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: classifyCity(verticalIndex), /// UserData[index] 처럼 사용
+        itemCount: classifyCity(verticalIndex),
         separatorBuilder: (context, index) {
           return const SizedBox(
             width: 10,
           );
         },
         itemBuilder: (context, horizontalIndex) {
-          int combinedIndex = verticalIndex * 10 + horizontalIndex;
+          int combinedIndex = verticalIndex * classifyCity(verticalIndex) + horizontalIndex;
           String city1 = userData[combinedIndex]['city1'];
           String date = userData[combinedIndex]['date'];
           String title = userData[combinedIndex]['title'];
-          // print("으응으 ${city[verticalIndex]}");
           if (city[verticalIndex] == city1) {
             return Stack(
               children: [
@@ -253,7 +238,6 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
           } else {
             return null;
           }
-
         }
       ),
     );
