@@ -236,7 +236,7 @@ class _HistoryState extends State<History> with ChangeNotifier {
             actions: [
               TextButton(
                 onPressed: () {
-                  
+
                 },
                 child: Text(
                   "Share",
