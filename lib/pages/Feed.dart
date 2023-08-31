@@ -39,20 +39,14 @@ class _FeedState extends State<Feed> {
       setState(() {
         _isLoading = true;
       });
-
       var response = await http.get(Uri.parse(
           "http://44.218.14.132/feed?page=$pageCount&limit=$numberOfFeed")); //get
-
       print(response.statusCode);
-
       var data = jsonDecode(response.body);
-
       setState(() {
         feedItems.addAll(data['summaries']);
         pageCount++;
         _isLoading = false;
-        // print("피드 아이템의 개수입니다. ${feedItems.length}");
-        // print("페이지 번호입니다. $pageCount");
       });
     }
   }
