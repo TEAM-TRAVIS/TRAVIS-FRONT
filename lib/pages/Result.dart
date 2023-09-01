@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Travis/Provider.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/pages/MyPage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Travis/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -33,8 +34,29 @@ class _ResultState extends State<Result> {
   String? contentValue = "";
   bool isPublic = false;
   Utils utils = Utils();
+  int maxgpxdatalength = 500;
 
-  Future saveGPS(Gpx gpxData, BuildContext context, var image) async {
+  Future splitGPS(Gpx gpxData, BuildContext context, var image) async {
+    int gpxDataSize = gpxData.wpts.length;
+    if(gpxDataSize > maxgpxdatalength)
+    {
+      int cnt = 0;
+      for(int i=0; i < gpxDataSize; i += maxgpxdatalength)
+      {
+        cnt++;
+        Gpx? tempGpxData = Gpx();
+        tempGpxData.wpts = gpxData.wpts.sublist(i, min(i+maxgpxdatalength,gpxDataSize));
+        saveGPS(tempGpxData, context, image, cnt);
+      }
+    }
+    else
+    {
+      saveGPS(gpxData, context, image, 0);
+    }
+  }
+
+  Future saveGPS(Gpx gpxData, BuildContext context, var image, int cnt) async {
+
     final gpxString = GpxWriter().asString(gpxData, pretty: true);
     final gpxGzip = GZipCodec().encode(utf8.encode(gpxString));
     final gpxBase64 = base64.encode(gpxGzip);
@@ -51,6 +73,7 @@ class _ResultState extends State<Result> {
     XmlNode timenode = document.findAllElements('desc').first;
     String timeValue = timenode.innerText;
     String city1 = await findRegion(routeCoordinates);
+    String logsplitnum = cnt.toString();
 
     try {
       var response = await http.post(Uri.parse(saveGPSUrl),
@@ -66,10 +89,12 @@ class _ResultState extends State<Result> {
             'isPublic' : isPublic ? "true":"false",
             'file' : gpxBase64,
             'city1' : city1,
+            'splitnum' : logsplitnum,
           }),
       ); //post
       print(response.statusCode);
       print(response.body);
+      print(logsplitnum);
       if (response.statusCode == 201) {
         Navigator.pushReplacement(
           context,
@@ -199,8 +224,8 @@ class _ResultState extends State<Result> {
                 TextButton(
                   onPressed: () async {
                     final image = await screenshotController.capture();
-                    saveGPS(gpxData, context, image);
-
+                    //saveGPS(gpxData, context, image);
+                    splitGPS(gpxData, context, image);
                   },
                   child: Text(
                     "Save",
