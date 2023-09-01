@@ -91,9 +91,10 @@ class _ResultState extends State<Result> {
 
   Future saveImage(BuildContext context, var stream) async {
     var formData = http.MultipartRequest('POST', Uri.parse("http://44.218.14.132/img/save"));
-    formData.files.add(http.MultipartFile.fromBytes(
+    formData.files.add(http.MultipartFile(
       'file',
-      stream,
+      stream.asStream(),
+      stream.length,
       // filename: '${Provider.of<UserProvider>(context, listen: false).userEmail!}/1693343377628_SS',
       filename: 'miniwa00@gmail.com/1693343377628_SS',
     ));
