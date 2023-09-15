@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:Travis/pages/AccumulatedHistory.dart';
 
-
 class SelectMap extends StatefulWidget {
   const SelectMap({super.key});
 
@@ -19,7 +18,6 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
   bool isMultiSelectionEnabled = false;
   HashSet<String> selectedIndexes = HashSet();
   List<dynamic> userData = [];
-  List<String> testCity = ['San Francisco', 'Los Angeles', 'Seoul', 'Tokyo', 'London'];
   HashSet<String> citySet = HashSet();
   List<String> city = [];
 
@@ -46,6 +44,7 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
         var decodedData = jsonDecode(response.body);
         setState(() {
           userData = decodedData['userData'];
+          print(userData.length);
           for (int i = 0; i < userData.length; i++) {
             String singleCity = userData[i]['city1'];
             citySet.add(singleCity);
@@ -113,9 +112,8 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
           actions: [
             TextButton(
               onPressed: () {
-                getAllSummary(context);
-                List<String> selectedList = selectedIndexes.toList();
-                print(selectedList);
+                print(userData.length);
+                print(classifyCity(0));
               },
               child: Text(
                 "test",
@@ -130,7 +128,6 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
             TextButton(
               onPressed: () {
                 List<String> selectedList = selectedIndexes.toList();
-
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -154,7 +151,7 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
   }
 
   /// 개별 도시별로 레이아웃 배치
-  Widget recordViewArrange() {
+    Widget recordViewArrange() {
     return Container(
       margin: EdgeInsets.all(50),
       child: Center(
@@ -183,7 +180,6 @@ class _SelectMapState extends State<SelectMap> with ChangeNotifier {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            /// input City name received from server
             city[verticalIndex],
             style: SafeGoogleFont(
               'MuseoModerno',
