@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:Travis/Provider.dart';
+import 'package:Travis/pages/AccumulatedHistory.dart';
 import 'package:Travis/pages/History.dart';
 import 'package:Travis/pages/Map.dart';
 import 'package:Travis/pages/SelectMap.dart';
@@ -246,55 +247,109 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
               ),
             ],
           ),
-          body: Center(
-            child: Column(
-              children: [
-                Container(
-                  height: (MediaQuery.of(context).size.height)/4,
-                  color: const Color.fromARGB(255, 41, 91, 242),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]}",
-                            style: SafeGoogleFont(
-                              'MuseoModerno',
-                              fontSize: 27,
-                              fontWeight: FontWeight.bold,
-                              color: const Color.fromARGB(255, 236, 246, 255),
+          floatingActionButton: Visibility(
+            visible: isMultiSelectionEnabled,
+            child: FloatingActionButton(
+              onPressed: () {
+                List<String> selectedList = selectedIndexes.toList();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AccumulatedHistory(selectedList: selectedList)));
+              },
+              child: Icon(
+                  Icons.add_location_alt
+              ),
+            ),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          body: Stack(
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      height: (MediaQuery.of(context).size.height)/4,
+                      color: const Color.fromARGB(255, 41, 91, 242),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                "${Provider.of<UserProvider>(context).userEmail!.split("@")[0]}",
+                                style: SafeGoogleFont(
+                                  'MuseoModerno',
+                                  fontSize: 27,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color.fromARGB(255, 236, 246, 255),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 25, bottom: 3, left: 30, right: 30),
-                                child: Column(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        "Your travel distance",
-                                        textAlign: TextAlign.left,
-                                        style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color.fromARGB(255, 236, 246, 255),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Center(
-                                        child: Align(
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 25, bottom: 3, left: 30, right: 30),
+                                    child: Column(
+                                      children: [
+                                        Align(
                                           alignment: Alignment.centerRight,
                                           child: Text(
-                                            "${userToDist.toString()}km",
-                                            // "0km",
+                                            "Your travel distance",
+                                            textAlign: TextAlign.left,
+                                            style: SafeGoogleFont(
+                                              'MuseoModerno',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color.fromARGB(255, 236, 246, 255),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Center(
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: Text(
+                                                "${userToDist.toString()}km",
+                                                // "0km",
+                                                style: SafeGoogleFont(
+                                                  'MuseoModerno',
+                                                  fontSize: 25,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: const Color.fromARGB(255, 236, 246, 255),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 3, bottom: 20, left: 30, right: 30),
+                                    child: Column(
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            "Your travel time",
+                                            style: SafeGoogleFont(
+                                              'MuseoModerno',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color.fromARGB(255, 236, 246, 255),
+                                            ),
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            formatTime(userToTime),
                                             style: SafeGoogleFont(
                                               'MuseoModerno',
                                               fontSize: 25,
@@ -303,77 +358,44 @@ class _MyPageState extends State<MyPage> with ChangeNotifier {
                                             ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 3, bottom: 20, left: 30, right: 30),
-                                child: Column(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        "Your travel time",
-                                        style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color.fromARGB(255, 236, 246, 255),
-                                        ),
-                                      ),
-                                    ),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        formatTime(userToTime),
-                                        style: SafeGoogleFont(
-                                          'MuseoModerno',
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color.fromARGB(255, 236, 246, 255),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
 
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: userData.length,
-                      itemBuilder: (context, index) {
-                        String date = userData[index]['date'];
-                        double dist = userData[index]['dist'].toDouble();
-                        int time = userData[index]['time'];
-                        String title = userData[index]['title'];
-                        String? city1 = userData[index]['city1'];
-                        if (index < userData.length) {
-                          return _routeList(context, date, dist, time, title, city1);
-                        } else if (_isLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        } else {
-                          return SizedBox.shrink();
-                        }
-                      }
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: userData.length,
+                          itemBuilder: (context, index) {
+                            String date = userData[index]['date'];
+                            double dist = userData[index]['dist'].toDouble();
+                            int time = userData[index]['time'];
+                            String title = userData[index]['title'];
+                            String? city1 = userData[index]['city1'];
+                            if (index < userData.length) {
+                              return _routeList(context, date, dist, time, title, city1);
+                            } else if (_isLoading) {
+                              return Center(child: CircularProgressIndicator());
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          }
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
